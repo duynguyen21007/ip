@@ -6,9 +6,7 @@ import java.util.Scanner;
 public class Milo {
     private static final String DIVIDER = "-----------------------------------";
     private static final String INDENTBLOCK = "                   ";
-    private static final String[] TASKS = new String[100];
-    /** Stores the completion state for the task at the matching index in {@link #TASKS}. */
-    private static final boolean[] TASKS_DONE = new boolean[TASKS.length];
+    private static final Task[] TASKS = new Task[100];
 
     public static void main(String[] args) {
         String chatbotName = "Milo";
@@ -37,16 +35,14 @@ public class Milo {
                 } else if (command.equals("list")) {
                     System.out.println(INDENTBLOCK + "Here are the tasks in your list:");
                     for (int i = 0; i < taskCount; i++) {
-                        String statusIcon = TASKS_DONE[i] ? "X" : " ";
-                        System.out.println(INDENTBLOCK + (i + 1) + ".[" + statusIcon
-                                + "] " + TASKS[i]);
+                        System.out.println(INDENTBLOCK + (i + 1) + "." + TASKS[i]);
                     }
                 } else if (command.equals("mark") || command.startsWith("mark ")) {
                     setTaskDoneStatus(command, taskCount, true);
                 } else if (command.equals("unmark") || command.startsWith("unmark ")) {
                     setTaskDoneStatus(command, taskCount, false);
                 } else {
-                    TASKS[taskCount] = command;
+                    TASKS[taskCount] = new Task(command);
                     taskCount++;
                     System.out.println(INDENTBLOCK + "added: " + command);
                 }
@@ -82,13 +78,14 @@ public class Milo {
         }
 
         int taskIndex = taskNumber - 1;
-        TASKS_DONE[taskIndex] = isDone;
+        Task selectedTask = TASKS[taskIndex];
         if (isDone) {
+            selectedTask.markAsDone();
             System.out.println(INDENTBLOCK + "Nice! I've marked this task as done:");
         } else {
+            selectedTask.markAsNotDone();
             System.out.println(INDENTBLOCK + "OK, I've marked this task as not done yet:");
         }
-        String statusIcon = isDone ? "X" : " ";
-        System.out.println(INDENTBLOCK + "  [" + statusIcon + "] " + TASKS[taskIndex]);
+        System.out.println(INDENTBLOCK + "  " + selectedTask);
     }
 }
