@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -8,7 +10,7 @@ import java.util.regex.Pattern;
 public class Milo {
     private static final String DIVIDER = "-----------------------------------";
     private static final String INDENTBLOCK = "                   ";
-    private static final Task[] TASKS = new Task[100];
+    private static final List<Task> TASKS = new ArrayList<>();
     private static final Pattern TODO_COMMAND = Pattern.compile("^todo\\s+(.+)$");
     private static final Pattern DEADLINE_COMMAND = Pattern.compile(
             "^deadline\\s+(.+?)\\s+/by\\s+(.+)$");
@@ -16,6 +18,7 @@ public class Milo {
             "^event\\s+(.+?)\\s+/from\\s+(.+?)\\s+/to\\s+(.+)$");
 
     public static void main(String[] args) {
+        TASKS.clear();
         String chatbotName = "Milo";
         String greeting = DIVIDER + "\n"
                 + "Hello! I'm " + chatbotName + ".\n"
@@ -29,7 +32,6 @@ public class Milo {
         System.out.println(banner + greeting);
 
         try (Scanner scanner = new Scanner(System.in)) {
-            int taskCount = 0;
             while (scanner.hasNextLine()) {
                 String command = scanner.nextLine().trim();
 
@@ -42,20 +44,19 @@ public class Milo {
                         break;
                     } else if (command.equals("list")) {
                         System.out.println(INDENTBLOCK + "Here are the tasks in your list:");
-                        for (int i = 0; i < taskCount; i++) {
-                            System.out.println(INDENTBLOCK + (i + 1) + "." + TASKS[i]);
+                        for (int i = 0; i < TASKS.size(); i++) {
+                            System.out.println(INDENTBLOCK + (i + 1) + "." + TASKS.get(i));
                         }
                     } else if (command.equals("mark") || command.startsWith("mark ")) {
-                        setTaskDoneStatus(command, taskCount, true);
+                        setTaskDoneStatus(command, true);
                     } else if (command.equals("unmark") || command.startsWith("unmark ")) {
-                        setTaskDoneStatus(command, taskCount, false);
+                        setTaskDoneStatus(command, false);
                     } else if (command.equals("delete") || command.startsWith("delete ")) {
-                        taskCount = deleteTask(command, taskCount);
+                        deleteTask(command);
                     } else {
                         Task newTask = createTask(command);
-                        TASKS[taskCount] = newTask;
-                        taskCount++;
-                        printTaskAdded(newTask, taskCount);
+                        TASKS.add(newTask);
+                        printTaskAdded(newTask);
                     }
                 } catch (MiloException exception) {
                     System.out.println(INDENTBLOCK + "OOPS!!! " + exception.getMessage());
@@ -105,27 +106,26 @@ public class Milo {
      * Prints confirmation that a task was added and shows the new list size.
      *
      * @param task task that was added
-     * @param taskCount updated number of tasks in the list
      */
-    private static void printTaskAdded(Task task, int taskCount) {
+    private static void printTaskAdded(Task task) {
         System.out.println(INDENTBLOCK + "Got it. I've added this task:");
         System.out.println(INDENTBLOCK + "  " + task);
-        System.out.println(INDENTBLOCK + "Now you have " + taskCount + " tasks in the list.");
+        System.out.println(INDENTBLOCK + "Now you have " + TASKS.size()
+                + " tasks in the list.");
     }
 
     /**
      * Updates the completion state of the task number supplied in a mark or unmark command.
      *
      * @param command full command entered by the user
-     * @param taskCount number of tasks currently stored
      * @param isDone new completion state for the selected task
      * @throws MiloException if the task number is missing, invalid, or outside the list
      */
-    private static void setTaskDoneStatus(String command, int taskCount, boolean isDone)
+    private static void setTaskDoneStatus(String command, boolean isDone)
             throws MiloException {
         String action = isDone ? "mark" : "unmark";
-        int taskIndex = parseTaskIndex(command, action, taskCount);
-        Task selectedTask = TASKS[taskIndex];
+        int taskIndex = parseTaskIndex(command, action);
+        Task selectedTask = TASKS.get(taskIndex);
         if (isDone) {
             selectedTask.markAsDone();
             System.out.println(INDENTBLOCK + "Nice! I've marked this task as done:");
@@ -137,28 +137,18 @@ public class Milo {
     }
 
     /**
-     * Removes the selected task and shifts later tasks forward to keep numbering contiguous.
+     * Removes the selected task; the list shifts later tasks to keep numbering contiguous.
      *
      * @param command full delete command entered by the user
-     * @param taskCount number of tasks currently stored
-     * @return the reduced number of stored tasks
      * @throws MiloException if the task number is missing, invalid, or outside the list
      */
-    private static int deleteTask(String command, int taskCount) throws MiloException {
-        int taskIndex = parseTaskIndex(command, "delete", taskCount);
-        Task deletedTask = TASKS[taskIndex];
-
-        for (int i = taskIndex; i < taskCount - 1; i++) {
-            TASKS[i] = TASKS[i + 1];
-        }
-
-        int updatedTaskCount = taskCount - 1;
-        TASKS[updatedTaskCount] = null;
+    private static void deleteTask(String command) throws MiloException {
+        int taskIndex = parseTaskIndex(command, "delete");
+        Task deletedTask = TASKS.remove(taskIndex);
         System.out.println(INDENTBLOCK + "Noted. I've removed this task:");
         System.out.println(INDENTBLOCK + "  " + deletedTask);
-        System.out.println(INDENTBLOCK + "Now you have " + updatedTaskCount
+        System.out.println(INDENTBLOCK + "Now you have " + TASKS.size()
                 + " tasks in the list.");
-        return updatedTaskCount;
     }
 
     /**
@@ -166,11 +156,10 @@ public class Milo {
      *
      * @param command full command entered by the user
      * @param action command word whose argument should be parsed
-     * @param taskCount number of tasks currently stored
      * @return zero-based index of the selected task
      * @throws MiloException if the task number is missing, invalid, or outside the list
      */
-    private static int parseTaskIndex(String command, String action, int taskCount)
+    private static int parseTaskIndex(String command, String action)
             throws MiloException {
         String taskNumberText = command.substring(action.length()).trim();
         int taskNumber;
@@ -182,7 +171,7 @@ public class Milo {
                     + action + " 2");
         }
 
-        if (taskNumber < 1 || taskNumber > taskCount) {
+        if (taskNumber < 1 || taskNumber > TASKS.size()) {
             throw new MiloException("There is no task numbered " + taskNumber + ".");
         }
         return taskNumber - 1;
