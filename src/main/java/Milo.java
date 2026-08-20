@@ -1,4 +1,6 @@
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Runs the Milo chatbot and manages its in-memory task list.
@@ -7,6 +9,11 @@ public class Milo {
     private static final String DIVIDER = "-----------------------------------";
     private static final String INDENTBLOCK = "                   ";
     private static final Task[] TASKS = new Task[100];
+    private static final Pattern TODO_COMMAND = Pattern.compile("^todo\\s+(.+)$");
+    private static final Pattern DEADLINE_COMMAND = Pattern.compile(
+            "^deadline\\s+(.+?)\\s+/by\\s+(.+)$");
+    private static final Pattern EVENT_COMMAND = Pattern.compile(
+            "^event\\s+(.+?)\\s+/from\\s+(.+?)\\s+/to\\s+(.+)$");
 
     public static void main(String[] args) {
         String chatbotName = "Milo";
@@ -42,14 +49,65 @@ public class Milo {
                 } else if (command.equals("unmark") || command.startsWith("unmark ")) {
                     setTaskDoneStatus(command, taskCount, false);
                 } else {
-                    TASKS[taskCount] = new Task(command);
-                    taskCount++;
-                    System.out.println(INDENTBLOCK + "added: " + command);
+                    Task newTask = createTask(command);
+                    if (newTask != null) {
+                        TASKS[taskCount] = newTask;
+                        taskCount++;
+                        printTaskAdded(newTask, taskCount);
+                    }
                 }
 
                 System.out.println(INDENTBLOCK + DIVIDER);
             }
         }
+    }
+
+    /**
+     * Creates a typed task from a todo, deadline, or event command.
+     *
+     * @param command full command entered by the user
+     * @return the parsed task, or {@code null} when the command is invalid
+     */
+    private static Task createTask(String command) {
+        Matcher todoMatcher = TODO_COMMAND.matcher(command);
+        if (todoMatcher.matches()) {
+            return new Todo(todoMatcher.group(1));
+        }
+
+        Matcher deadlineMatcher = DEADLINE_COMMAND.matcher(command);
+        if (deadlineMatcher.matches()) {
+            return new Deadline(deadlineMatcher.group(1), deadlineMatcher.group(2));
+        }
+
+        Matcher eventMatcher = EVENT_COMMAND.matcher(command);
+        if (eventMatcher.matches()) {
+            return new Event(eventMatcher.group(1), eventMatcher.group(2), eventMatcher.group(3));
+        }
+
+        if (command.equals("todo") || command.startsWith("todo ")) {
+            System.out.println(INDENTBLOCK + "Use: todo <description>");
+        } else if (command.equals("deadline") || command.startsWith("deadline ")) {
+            System.out.println(INDENTBLOCK + "Use: deadline <description> /by <date/time>");
+        } else if (command.equals("event") || command.startsWith("event ")) {
+            System.out.println(INDENTBLOCK
+                    + "Use: event <description> /from <start> /to <end>");
+        } else {
+            System.out.println(INDENTBLOCK
+                    + "Unknown command. Use todo, deadline, event, list, mark, unmark, or bye.");
+        }
+        return null;
+    }
+
+    /**
+     * Prints confirmation that a task was added and shows the new list size.
+     *
+     * @param task task that was added
+     * @param taskCount updated number of tasks in the list
+     */
+    private static void printTaskAdded(Task task, int taskCount) {
+        System.out.println(INDENTBLOCK + "Got it. I've added this task:");
+        System.out.println(INDENTBLOCK + "  " + task);
+        System.out.println(INDENTBLOCK + "Now you have " + taskCount + " tasks in the list.");
     }
 
     /**
