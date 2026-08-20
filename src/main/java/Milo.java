@@ -38,10 +38,13 @@ public class Milo {
                     System.out.println(INDENTBLOCK + "Here are the tasks in your list:");
                     for (int i = 0; i < taskCount; i++) {
                         String statusIcon = TASKS_DONE[i] ? "X" : " ";
-                        System.out.println(INDENTBLOCK + (i + 1) + ".[" + statusIcon + "] " + TASKS[i]);
+                        System.out.println(INDENTBLOCK + (i + 1) + ".[" + statusIcon
+                                + "] " + TASKS[i]);
                     }
                 } else if (command.equals("mark") || command.startsWith("mark ")) {
-                    markTask(command, taskCount);
+                    setTaskDoneStatus(command, taskCount, true);
+                } else if (command.equals("unmark") || command.startsWith("unmark ")) {
+                    setTaskDoneStatus(command, taskCount, false);
                 } else {
                     TASKS[taskCount] = command;
                     taskCount++;
@@ -54,19 +57,22 @@ public class Milo {
     }
 
     /**
-     * Marks the task number supplied in a command such as {@code mark 2} as done.
+     * Updates the completion state of the task number supplied in a mark or unmark command.
      *
      * @param command full command entered by the user
      * @param taskCount number of tasks currently stored
+     * @param isDone new completion state for the selected task
      */
-    private static void markTask(String command, int taskCount) {
-        String taskNumberText = command.substring("mark".length()).trim();
+    private static void setTaskDoneStatus(String command, int taskCount, boolean isDone) {
+        String action = isDone ? "mark" : "unmark";
+        String taskNumberText = command.substring(action.length()).trim();
         int taskNumber;
 
         try {
             taskNumber = Integer.parseInt(taskNumberText);
         } catch (NumberFormatException exception) {
-            System.out.println(INDENTBLOCK + "Please specify a task number, for example: mark 2");
+            System.out.println(INDENTBLOCK + "Please specify a task number, for example: "
+                    + action + " 2");
             return;
         }
 
@@ -76,8 +82,13 @@ public class Milo {
         }
 
         int taskIndex = taskNumber - 1;
-        TASKS_DONE[taskIndex] = true;
-        System.out.println(INDENTBLOCK + "Nice! I've marked this task as done:");
-        System.out.println(INDENTBLOCK + "  [X] " + TASKS[taskIndex]);
+        TASKS_DONE[taskIndex] = isDone;
+        if (isDone) {
+            System.out.println(INDENTBLOCK + "Nice! I've marked this task as done:");
+        } else {
+            System.out.println(INDENTBLOCK + "OK, I've marked this task as not done yet:");
+        }
+        String statusIcon = isDone ? "X" : " ";
+        System.out.println(INDENTBLOCK + "  [" + statusIcon + "] " + TASKS[taskIndex]);
     }
 }
