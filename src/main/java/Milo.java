@@ -35,26 +35,28 @@ public class Milo {
 
                 System.out.println(INDENTBLOCK + DIVIDER);
 
-                if (command.equals("bye")) {
-                    System.out.println(INDENTBLOCK + "Bye, see you later!");
-                    System.out.println(INDENTBLOCK + DIVIDER);
-                    break;
-                } else if (command.equals("list")) {
-                    System.out.println(INDENTBLOCK + "Here are the tasks in your list:");
-                    for (int i = 0; i < taskCount; i++) {
-                        System.out.println(INDENTBLOCK + (i + 1) + "." + TASKS[i]);
-                    }
-                } else if (command.equals("mark") || command.startsWith("mark ")) {
-                    setTaskDoneStatus(command, taskCount, true);
-                } else if (command.equals("unmark") || command.startsWith("unmark ")) {
-                    setTaskDoneStatus(command, taskCount, false);
-                } else {
-                    Task newTask = createTask(command);
-                    if (newTask != null) {
+                try {
+                    if (command.equals("bye")) {
+                        System.out.println(INDENTBLOCK + "Bye, see you later!");
+                        System.out.println(INDENTBLOCK + DIVIDER);
+                        break;
+                    } else if (command.equals("list")) {
+                        System.out.println(INDENTBLOCK + "Here are the tasks in your list:");
+                        for (int i = 0; i < taskCount; i++) {
+                            System.out.println(INDENTBLOCK + (i + 1) + "." + TASKS[i]);
+                        }
+                    } else if (command.equals("mark") || command.startsWith("mark ")) {
+                        setTaskDoneStatus(command, taskCount, true);
+                    } else if (command.equals("unmark") || command.startsWith("unmark ")) {
+                        setTaskDoneStatus(command, taskCount, false);
+                    } else {
+                        Task newTask = createTask(command);
                         TASKS[taskCount] = newTask;
                         taskCount++;
                         printTaskAdded(newTask, taskCount);
                     }
+                } catch (MiloException exception) {
+                    System.out.println(INDENTBLOCK + "OOPS!!! " + exception.getMessage());
                 }
 
                 System.out.println(INDENTBLOCK + DIVIDER);
@@ -66,9 +68,10 @@ public class Milo {
      * Creates a typed task from a todo, deadline, or event command.
      *
      * @param command full command entered by the user
-     * @return the parsed task, or {@code null} when the command is invalid
+     * @return the parsed task
+     * @throws MiloException if the command is unknown or lacks required task details
      */
-    private static Task createTask(String command) {
+    private static Task createTask(String command) throws MiloException {
         Matcher todoMatcher = TODO_COMMAND.matcher(command);
         if (todoMatcher.matches()) {
             return new Todo(todoMatcher.group(1));
@@ -85,17 +88,15 @@ public class Milo {
         }
 
         if (command.equals("todo") || command.startsWith("todo ")) {
-            System.out.println(INDENTBLOCK + "Use: todo <description>");
+            throw new MiloException("A todo needs a description.");
         } else if (command.equals("deadline") || command.startsWith("deadline ")) {
-            System.out.println(INDENTBLOCK + "Use: deadline <description> /by <date/time>");
+            throw new MiloException(
+                    "A deadline needs a description followed by /by and a date or time.");
         } else if (command.equals("event") || command.startsWith("event ")) {
-            System.out.println(INDENTBLOCK
-                    + "Use: event <description> /from <start> /to <end>");
-        } else {
-            System.out.println(INDENTBLOCK
-                    + "Unknown command. Use todo, deadline, event, list, mark, unmark, or bye.");
+            throw new MiloException(
+                    "An event needs a description, /from start, and /to end.");
         }
-        return null;
+        throw new MiloException("I don't recognize that command :-(");
     }
 
     /**
@@ -116,8 +117,10 @@ public class Milo {
      * @param command full command entered by the user
      * @param taskCount number of tasks currently stored
      * @param isDone new completion state for the selected task
+     * @throws MiloException if the task number is missing, invalid, or outside the list
      */
-    private static void setTaskDoneStatus(String command, int taskCount, boolean isDone) {
+    private static void setTaskDoneStatus(String command, int taskCount, boolean isDone)
+            throws MiloException {
         String action = isDone ? "mark" : "unmark";
         String taskNumberText = command.substring(action.length()).trim();
         int taskNumber;
@@ -125,14 +128,12 @@ public class Milo {
         try {
             taskNumber = Integer.parseInt(taskNumberText);
         } catch (NumberFormatException exception) {
-            System.out.println(INDENTBLOCK + "Please specify a task number, for example: "
+            throw new MiloException("Please specify a task number, for example: "
                     + action + " 2");
-            return;
         }
 
         if (taskNumber < 1 || taskNumber > taskCount) {
-            System.out.println(INDENTBLOCK + "There is no task numbered " + taskNumber + ".");
-            return;
+            throw new MiloException("There is no task numbered " + taskNumber + ".");
         }
 
         int taskIndex = taskNumber - 1;
