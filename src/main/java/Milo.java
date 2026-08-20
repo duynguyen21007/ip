@@ -24,7 +24,7 @@ public class Milo {
         try (Scanner scanner = new Scanner(System.in)) {
             int taskCount = 0;
             while (scanner.hasNextLine()) {
-                String command = scanner.nextLine();
+                String command = scanner.nextLine().trim();
 
                 System.out.println(INDENTBLOCK + DIVIDER);
 
