@@ -6,6 +6,13 @@ import java.time.format.DateTimeParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import milo.command.AddCommand;
+import milo.command.Command;
+import milo.command.DeleteCommand;
+import milo.command.ExitCommand;
+import milo.command.ListCommand;
+import milo.command.MarkCommand;
+import milo.command.UnmarkCommand;
 import milo.exception.MiloException;
 import milo.task.Deadline;
 import milo.task.Event;
@@ -24,12 +31,38 @@ public class Parser {
             "^event\\s+(.+?)\\s+/from\\s+(.+?)\\s+/to\\s+(.+)$");
 
     /**
-     * Classifies a full user command without interpreting its arguments.
+     * Interprets a full user command and creates the command that can execute it.
      *
      * @param command trimmed command entered by the user
-     * @return matching command type, or {@link CommandType#UNKNOWN} when none matches
+     * @return executable command
+     * @throws MiloException if the command or its arguments are invalid
      */
-    public static CommandType parseCommandType(String command) {
+    public static Command parse(String command) throws MiloException {
+        CommandType commandType = parseCommandType(command);
+        switch (commandType) {
+        case BYE:
+            return new ExitCommand();
+        case LIST:
+            return new ListCommand();
+        case MARK:
+            return new MarkCommand(parseTaskNumber(command, "mark"));
+        case UNMARK:
+            return new UnmarkCommand(parseTaskNumber(command, "unmark"));
+        case DELETE:
+            return new DeleteCommand(parseTaskNumber(command, "delete"));
+        case TODO:
+        case DEADLINE:
+        case EVENT:
+            return new AddCommand(parseTask(command, commandType));
+        case UNKNOWN:
+            throw new MiloException("I don't recognize that command :-(");
+        default:
+            throw new IllegalStateException("Unhandled command type: " + commandType);
+        }
+    }
+
+    /** Classifies a full user command without interpreting its arguments. */
+    private static CommandType parseCommandType(String command) {
         if (command.equals("bye")) {
             return CommandType.BYE;
         } else if (command.equals("list")) {
@@ -58,7 +91,7 @@ public class Parser {
      * @return parsed task
      * @throws MiloException if the command lacks required task details
      */
-    public static Task parseTask(String command, CommandType commandType) throws MiloException {
+    private static Task parseTask(String command, CommandType commandType) throws MiloException {
         Matcher todoMatcher = TODO_COMMAND.matcher(command);
         if (todoMatcher.matches()) {
             return new Todo(todoMatcher.group(1));
@@ -88,16 +121,14 @@ public class Parser {
     }
 
     /**
-     * Parses and validates the one-based task number used by a task command.
+     * Parses the one-based task number used by a task command.
      *
      * @param command full command entered by the user
      * @param action command word whose argument should be parsed
-     * @param taskCount current number of tasks
-     * @return zero-based index of the selected task
-     * @throws MiloException if the task number is missing, invalid, or outside the list
+     * @return one-based number of the selected task
+     * @throws MiloException if the task number is missing or invalid
      */
-    public static int parseTaskIndex(String command, String action, int taskCount)
-            throws MiloException {
+    private static int parseTaskNumber(String command, String action) throws MiloException {
         String taskNumberText = command.substring(action.length()).trim();
         int taskNumber;
 
@@ -108,10 +139,7 @@ public class Parser {
                     + action + " 2");
         }
 
-        if (taskNumber < 1 || taskNumber > taskCount) {
-            throw new MiloException("There is no task numbered " + taskNumber + ".");
-        }
-        return taskNumber - 1;
+        return taskNumber;
     }
 
     /** Returns whether the command is a keyword alone or followed by arguments. */
