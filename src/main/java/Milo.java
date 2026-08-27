@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -68,7 +69,12 @@ public class Milo {
                     case EVENT:
                         Task newTask = createTask(command, commandType);
                         TASKS.add(newTask);
-                        saveTasks();
+                        try {
+                            saveTasks();
+                        } catch (MiloException exception) {
+                            TASKS.remove(TASKS.size() - 1);
+                            throw exception;
+                        }
                         printTaskAdded(newTask);
                         break;
                     case UNKNOWN:
@@ -153,7 +159,16 @@ public class Milo {
             selectedTask.markAsNotDone();
             System.out.println(INDENTBLOCK + "OK, I've marked this task as not done yet:");
         }
-        saveTasks();
+        try {
+            saveTasks();
+        } catch (MiloException exception) {
+            if (isDone) {
+                selectedTask.markAsNotDone();
+            } else {
+                selectedTask.markAsDone();
+            }
+            throw exception;
+        }
         System.out.println(INDENTBLOCK + "  " + selectedTask);
     }
 
@@ -166,7 +181,12 @@ public class Milo {
     private static void deleteTask(String command) throws MiloException {
         int taskIndex = parseTaskIndex(command, "delete");
         Task deletedTask = TASKS.remove(taskIndex);
-        saveTasks();
+        try {
+            saveTasks();
+        } catch (MiloException exception) {
+            TASKS.add(taskIndex, deletedTask);
+            throw exception;
+        }
         System.out.println(INDENTBLOCK + "Noted. I've removed this task:");
         System.out.println(INDENTBLOCK + "  " + deletedTask);
         System.out.println(INDENTBLOCK + "Now you have " + TASKS.size()
@@ -201,12 +221,25 @@ public class Milo {
 
     /** Saves the current task list in a simple line-based format. */
     private static void saveTasks() throws MiloException {
+        Path temporaryFile = DATA_FILE.resolveSibling(DATA_FILE.getFileName() + ".tmp");
         try {
             Files.createDirectories(DATA_FILE.getParent());
             List<String> taskLines = TASKS.stream().map(Task::toString).toList();
-            Files.write(DATA_FILE, taskLines);
-        } catch (IOException exception) {
+            Files.write(temporaryFile, taskLines);
+            try {
+                Files.move(temporaryFile, DATA_FILE, StandardCopyOption.REPLACE_EXISTING,
+                        StandardCopyOption.ATOMIC_MOVE);
+            } catch (java.nio.file.AtomicMoveNotSupportedException exception) {
+                Files.move(temporaryFile, DATA_FILE, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (IOException | SecurityException exception) {
             throw new MiloException("I couldn't save your tasks.");
+        } finally {
+            try {
+                Files.deleteIfExists(temporaryFile);
+            } catch (IOException | SecurityException exception) {
+                // The next save will replace the temporary file.
+            }
         }
     }
 }
