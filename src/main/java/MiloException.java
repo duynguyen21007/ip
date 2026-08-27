@@ -2,6 +2,9 @@
  * Represents an input error that Milo can explain to the user and recover from.
  */
 public class MiloException extends Exception {
+    /** Identifies this exception's serialized form across application versions. */
+    private static final long serialVersionUID = 1L;
+
     /**
      * Creates an exception carrying a user-friendly explanation of the input error.
      *
