@@ -1,55 +1,37 @@
-import java.util.Scanner;
-
 /**
  * Runs the Milo chatbot and manages its in-memory task list.
  */
 public class Milo {
-    private static final String DIVIDER = "-----------------------------------";
-    private static final String INDENTBLOCK = "                   ";
     private static final Storage STORAGE = new Storage("data/duke.txt");
     private static final TaskList TASKS = new TaskList();
 
     public static void main(String[] args) {
         TASKS.clear();
-        String chatbotName = "Milo";
-        String greeting = DIVIDER + "\n"
-                + "Hello! I'm " + chatbotName + ".\n"
-                + "How can I help you?\n"
-                + DIVIDER;
-        String banner = " __  __ _ _       \n"
-                      + "|  \\/  (_) | ___  \n"
-                      + "| |\\/| | | |/ _ \\ \n"
-                      + "| |  | | | | (_) |\n"
-                      + "|_|  |_|_|_|\\___/ \n";
-        System.out.println(banner + greeting);
-
-        try (Scanner scanner = new Scanner(System.in)) {
-            while (scanner.hasNextLine()) {
-                String command = scanner.nextLine().trim();
+        try (Ui ui = new Ui()) {
+            ui.showWelcome();
+            while (ui.hasNextCommand()) {
+                String command = ui.readCommand();
                 CommandType commandType = Parser.parseCommandType(command);
 
-                System.out.println(INDENTBLOCK + DIVIDER);
+                ui.showLine();
 
                 try {
                     switch (commandType) {
                     case BYE:
-                        System.out.println(INDENTBLOCK + "Bye, see you later!");
-                        System.out.println(INDENTBLOCK + DIVIDER);
+                        ui.showGoodbye();
+                        ui.showLine();
                         return;
                     case LIST:
-                        System.out.println(INDENTBLOCK + "Here are the tasks in your list:");
-                        for (int i = 0; i < TASKS.size(); i++) {
-                            System.out.println(INDENTBLOCK + (i + 1) + "." + TASKS.get(i));
-                        }
+                        ui.showTaskList(TASKS);
                         break;
                     case MARK:
-                        setTaskDoneStatus(command, true);
+                        setTaskDoneStatus(command, true, ui);
                         break;
                     case UNMARK:
-                        setTaskDoneStatus(command, false);
+                        setTaskDoneStatus(command, false, ui);
                         break;
                     case DELETE:
-                        deleteTask(command);
+                        deleteTask(command, ui);
                         break;
                     case TODO:
                     case DEADLINE:
@@ -62,7 +44,7 @@ public class Milo {
                             TASKS.delete(TASKS.size() - 1);
                             throw exception;
                         }
-                        printTaskAdded(newTask);
+                        ui.showTaskAdded(newTask, TASKS.size());
                         break;
                     case UNKNOWN:
                         throw new MiloException("I don't recognize that command :-(");
@@ -70,24 +52,12 @@ public class Milo {
                         throw new IllegalStateException("Unhandled command type: " + commandType);
                     }
                 } catch (MiloException exception) {
-                    System.out.println(INDENTBLOCK + "OOPS!!! " + exception.getMessage());
+                    ui.showError(exception.getMessage());
                 }
 
-                System.out.println(INDENTBLOCK + DIVIDER);
+                ui.showLine();
             }
         }
-    }
-
-    /**
-     * Prints confirmation that a task was added and shows the new list size.
-     *
-     * @param task task that was added
-     */
-    private static void printTaskAdded(Task task) {
-        System.out.println(INDENTBLOCK + "Got it. I've added this task:");
-        System.out.println(INDENTBLOCK + "  " + task);
-        System.out.println(INDENTBLOCK + "Now you have " + TASKS.size()
-                + " tasks in the list.");
     }
 
     /**
@@ -95,19 +65,20 @@ public class Milo {
      *
      * @param command full command entered by the user
      * @param isDone new completion state for the selected task
+     * @param ui console UI used to show the result
      * @throws MiloException if the task number is missing, invalid, or outside the list
      */
-    private static void setTaskDoneStatus(String command, boolean isDone)
+    private static void setTaskDoneStatus(String command, boolean isDone, Ui ui)
             throws MiloException {
         String action = isDone ? "mark" : "unmark";
         int taskIndex = Parser.parseTaskIndex(command, action, TASKS.size());
         Task selectedTask;
         if (isDone) {
             selectedTask = TASKS.mark(taskIndex);
-            System.out.println(INDENTBLOCK + "Nice! I've marked this task as done:");
+            ui.showTaskMarkedHeader();
         } else {
             selectedTask = TASKS.unmark(taskIndex);
-            System.out.println(INDENTBLOCK + "OK, I've marked this task as not done yet:");
+            ui.showTaskUnmarkedHeader();
         }
         try {
             STORAGE.save(TASKS);
@@ -119,16 +90,17 @@ public class Milo {
             }
             throw exception;
         }
-        System.out.println(INDENTBLOCK + "  " + selectedTask);
+        ui.showTask(selectedTask);
     }
 
     /**
      * Removes the selected task; the list shifts later tasks to keep numbering contiguous.
      *
      * @param command full delete command entered by the user
+     * @param ui console UI used to show the result
      * @throws MiloException if the task number is missing, invalid, or outside the list
      */
-    private static void deleteTask(String command) throws MiloException {
+    private static void deleteTask(String command, Ui ui) throws MiloException {
         int taskIndex = Parser.parseTaskIndex(command, "delete", TASKS.size());
         Task deletedTask = TASKS.delete(taskIndex);
         try {
@@ -137,10 +109,7 @@ public class Milo {
             TASKS.add(taskIndex, deletedTask);
             throw exception;
         }
-        System.out.println(INDENTBLOCK + "Noted. I've removed this task:");
-        System.out.println(INDENTBLOCK + "  " + deletedTask);
-        System.out.println(INDENTBLOCK + "Now you have " + TASKS.size()
-                + " tasks in the list.");
+        ui.showTaskDeleted(deletedTask, TASKS.size());
     }
 
 }
