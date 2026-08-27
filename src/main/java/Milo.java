@@ -1,8 +1,3 @@
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -11,7 +6,7 @@ import java.util.Scanner;
 public class Milo {
     private static final String DIVIDER = "-----------------------------------";
     private static final String INDENTBLOCK = "                   ";
-    private static final Path DATA_FILE = Path.of("data", "duke.txt");
+    private static final Storage STORAGE = new Storage("data/duke.txt");
     private static final TaskList TASKS = new TaskList();
 
     public static void main(String[] args) {
@@ -62,7 +57,7 @@ public class Milo {
                         Task newTask = Parser.parseTask(command, commandType);
                         TASKS.add(newTask);
                         try {
-                            saveTasks();
+                            STORAGE.save(TASKS);
                         } catch (MiloException exception) {
                             TASKS.delete(TASKS.size() - 1);
                             throw exception;
@@ -115,7 +110,7 @@ public class Milo {
             System.out.println(INDENTBLOCK + "OK, I've marked this task as not done yet:");
         }
         try {
-            saveTasks();
+            STORAGE.save(TASKS);
         } catch (MiloException exception) {
             if (isDone) {
                 TASKS.unmark(taskIndex);
@@ -137,7 +132,7 @@ public class Milo {
         int taskIndex = Parser.parseTaskIndex(command, "delete", TASKS.size());
         Task deletedTask = TASKS.delete(taskIndex);
         try {
-            saveTasks();
+            STORAGE.save(TASKS);
         } catch (MiloException exception) {
             TASKS.add(taskIndex, deletedTask);
             throw exception;
@@ -148,27 +143,4 @@ public class Milo {
                 + " tasks in the list.");
     }
 
-    /** Saves the current task list in a simple line-based format. */
-    private static void saveTasks() throws MiloException {
-        Path temporaryFile = DATA_FILE.resolveSibling(DATA_FILE.getFileName() + ".tmp");
-        try {
-            Files.createDirectories(DATA_FILE.getParent());
-            List<String> taskLines = TASKS.getTasks().stream().map(Task::toString).toList();
-            Files.write(temporaryFile, taskLines);
-            try {
-                Files.move(temporaryFile, DATA_FILE, StandardCopyOption.REPLACE_EXISTING,
-                        StandardCopyOption.ATOMIC_MOVE);
-            } catch (java.nio.file.AtomicMoveNotSupportedException exception) {
-                Files.move(temporaryFile, DATA_FILE, StandardCopyOption.REPLACE_EXISTING);
-            }
-        } catch (IOException | SecurityException exception) {
-            throw new MiloException("I couldn't save your tasks.");
-        } finally {
-            try {
-                Files.deleteIfExists(temporaryFile);
-            } catch (IOException | SecurityException exception) {
-                // The next save will replace the temporary file.
-            }
-        }
-    }
 }
