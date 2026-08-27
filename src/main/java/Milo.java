@@ -2,7 +2,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -13,7 +12,7 @@ public class Milo {
     private static final String DIVIDER = "-----------------------------------";
     private static final String INDENTBLOCK = "                   ";
     private static final Path DATA_FILE = Path.of("data", "duke.txt");
-    private static final List<Task> TASKS = new ArrayList<>();
+    private static final TaskList TASKS = new TaskList();
 
     public static void main(String[] args) {
         TASKS.clear();
@@ -65,7 +64,7 @@ public class Milo {
                         try {
                             saveTasks();
                         } catch (MiloException exception) {
-                            TASKS.remove(TASKS.size() - 1);
+                            TASKS.delete(TASKS.size() - 1);
                             throw exception;
                         }
                         printTaskAdded(newTask);
@@ -107,21 +106,21 @@ public class Milo {
             throws MiloException {
         String action = isDone ? "mark" : "unmark";
         int taskIndex = Parser.parseTaskIndex(command, action, TASKS.size());
-        Task selectedTask = TASKS.get(taskIndex);
+        Task selectedTask;
         if (isDone) {
-            selectedTask.markAsDone();
+            selectedTask = TASKS.mark(taskIndex);
             System.out.println(INDENTBLOCK + "Nice! I've marked this task as done:");
         } else {
-            selectedTask.markAsNotDone();
+            selectedTask = TASKS.unmark(taskIndex);
             System.out.println(INDENTBLOCK + "OK, I've marked this task as not done yet:");
         }
         try {
             saveTasks();
         } catch (MiloException exception) {
             if (isDone) {
-                selectedTask.markAsNotDone();
+                TASKS.unmark(taskIndex);
             } else {
-                selectedTask.markAsDone();
+                TASKS.mark(taskIndex);
             }
             throw exception;
         }
@@ -136,7 +135,7 @@ public class Milo {
      */
     private static void deleteTask(String command) throws MiloException {
         int taskIndex = Parser.parseTaskIndex(command, "delete", TASKS.size());
-        Task deletedTask = TASKS.remove(taskIndex);
+        Task deletedTask = TASKS.delete(taskIndex);
         try {
             saveTasks();
         } catch (MiloException exception) {
@@ -154,7 +153,7 @@ public class Milo {
         Path temporaryFile = DATA_FILE.resolveSibling(DATA_FILE.getFileName() + ".tmp");
         try {
             Files.createDirectories(DATA_FILE.getParent());
-            List<String> taskLines = TASKS.stream().map(Task::toString).toList();
+            List<String> taskLines = TASKS.getTasks().stream().map(Task::toString).toList();
             Files.write(temporaryFile, taskLines);
             try {
                 Files.move(temporaryFile, DATA_FILE, StandardCopyOption.REPLACE_EXISTING,
