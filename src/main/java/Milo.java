@@ -1,4 +1,7 @@
 import java.util.ArrayList;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -10,6 +13,7 @@ import java.util.regex.Pattern;
 public class Milo {
     private static final String DIVIDER = "-----------------------------------";
     private static final String INDENTBLOCK = "                   ";
+    private static final Path DATA_FILE = Path.of("data", "duke.txt");
     private static final List<Task> TASKS = new ArrayList<>();
     private static final Pattern TODO_COMMAND = Pattern.compile("^todo\\s+(.+)$");
     private static final Pattern DEADLINE_COMMAND = Pattern.compile(
@@ -34,29 +38,43 @@ public class Milo {
         try (Scanner scanner = new Scanner(System.in)) {
             while (scanner.hasNextLine()) {
                 String command = scanner.nextLine().trim();
+                CommandType commandType = CommandType.from(command);
 
                 System.out.println(INDENTBLOCK + DIVIDER);
 
                 try {
-                    if (command.equals("bye")) {
+                    switch (commandType) {
+                    case BYE:
                         System.out.println(INDENTBLOCK + "Bye, see you later!");
                         System.out.println(INDENTBLOCK + DIVIDER);
-                        break;
-                    } else if (command.equals("list")) {
+                        return;
+                    case LIST:
                         System.out.println(INDENTBLOCK + "Here are the tasks in your list:");
                         for (int i = 0; i < TASKS.size(); i++) {
                             System.out.println(INDENTBLOCK + (i + 1) + "." + TASKS.get(i));
                         }
-                    } else if (command.equals("mark") || command.startsWith("mark ")) {
+                        break;
+                    case MARK:
                         setTaskDoneStatus(command, true);
-                    } else if (command.equals("unmark") || command.startsWith("unmark ")) {
+                        break;
+                    case UNMARK:
                         setTaskDoneStatus(command, false);
-                    } else if (command.equals("delete") || command.startsWith("delete ")) {
+                        break;
+                    case DELETE:
                         deleteTask(command);
-                    } else {
-                        Task newTask = createTask(command);
+                        break;
+                    case TODO:
+                    case DEADLINE:
+                    case EVENT:
+                        Task newTask = createTask(command, commandType);
                         TASKS.add(newTask);
+                        saveTasks();
                         printTaskAdded(newTask);
+                        break;
+                    case UNKNOWN:
+                        throw new MiloException("I don't recognize that command :-(");
+                    default:
+                        throw new IllegalStateException("Unhandled command type: " + commandType);
                     }
                 } catch (MiloException exception) {
                     System.out.println(INDENTBLOCK + "OOPS!!! " + exception.getMessage());
@@ -71,10 +89,12 @@ public class Milo {
      * Creates a typed task from a todo, deadline, or event command.
      *
      * @param command full command entered by the user
+     * @param commandType type of task command being parsed
      * @return the parsed task
-     * @throws MiloException if the command is unknown or lacks required task details
+     * @throws MiloException if the command lacks required task details
      */
-    private static Task createTask(String command) throws MiloException {
+    private static Task createTask(String command, CommandType commandType)
+            throws MiloException {
         Matcher todoMatcher = TODO_COMMAND.matcher(command);
         if (todoMatcher.matches()) {
             return new Todo(todoMatcher.group(1));
@@ -90,16 +110,16 @@ public class Milo {
             return new Event(eventMatcher.group(1), eventMatcher.group(2), eventMatcher.group(3));
         }
 
-        if (command.equals("todo") || command.startsWith("todo ")) {
+        if (commandType == CommandType.TODO) {
             throw new MiloException("A todo needs a description.");
-        } else if (command.equals("deadline") || command.startsWith("deadline ")) {
+        } else if (commandType == CommandType.DEADLINE) {
             throw new MiloException(
                     "A deadline needs a description followed by /by and a date or time.");
-        } else if (command.equals("event") || command.startsWith("event ")) {
+        } else if (commandType == CommandType.EVENT) {
             throw new MiloException(
                     "An event needs a description, /from start, and /to end.");
         }
-        throw new MiloException("I don't recognize that command :-(");
+        throw new IllegalStateException("Not a task command: " + commandType);
     }
 
     /**
@@ -133,6 +153,7 @@ public class Milo {
             selectedTask.markAsNotDone();
             System.out.println(INDENTBLOCK + "OK, I've marked this task as not done yet:");
         }
+        saveTasks();
         System.out.println(INDENTBLOCK + "  " + selectedTask);
     }
 
@@ -145,6 +166,7 @@ public class Milo {
     private static void deleteTask(String command) throws MiloException {
         int taskIndex = parseTaskIndex(command, "delete");
         Task deletedTask = TASKS.remove(taskIndex);
+        saveTasks();
         System.out.println(INDENTBLOCK + "Noted. I've removed this task:");
         System.out.println(INDENTBLOCK + "  " + deletedTask);
         System.out.println(INDENTBLOCK + "Now you have " + TASKS.size()
@@ -175,5 +197,16 @@ public class Milo {
             throw new MiloException("There is no task numbered " + taskNumber + ".");
         }
         return taskNumber - 1;
+    }
+
+    /** Saves the current task list in a simple line-based format. */
+    private static void saveTasks() throws MiloException {
+        try {
+            Files.createDirectories(DATA_FILE.getParent());
+            List<String> taskLines = TASKS.stream().map(Task::toString).toList();
+            Files.write(DATA_FILE, taskLines);
+        } catch (IOException exception) {
+            throw new MiloException("I couldn't save your tasks.");
+        }
     }
 }
