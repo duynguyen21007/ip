@@ -1,3 +1,5 @@
+package milo.exception;
+
 /**
  * Represents an input error that Milo can explain to the user and recover from.
  */

@@ -2,7 +2,7 @@
 
 ## Configuration
 
-- Main class: `Milo`
+- Main class: `milo.Milo`
 - Source directory: `src/main/java`
 - Java release: `25`
 

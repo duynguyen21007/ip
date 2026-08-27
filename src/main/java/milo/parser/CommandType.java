@@ -1,3 +1,5 @@
+package milo.parser;
+
 /**
  * Identifies the finite set of commands understood by Milo.
  */

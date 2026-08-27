@@ -1,4 +1,9 @@
+package milo.ui;
+
 import java.util.Scanner;
+
+import milo.task.Task;
+import milo.task.TaskList;
 
 /**
  * Handles Milo's console input and output.
