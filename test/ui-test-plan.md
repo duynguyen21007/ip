@@ -6,7 +6,7 @@
 - Source directory: `src/main/java`
 - Java release: `25`
 
-Each test case starts Milo in a fresh process. The runner compares complete standard output after normalizing platform line endings and trailing spaces. Leading whitespace remains significant. It stops immediately after the first failing case and records the visible session in `_temp/ui-test/session.log`.
+Each test case starts Milo in a fresh process. Start the ordered suite without `data/duke.txt`; the first two cases intentionally share saved state to verify loading across a restart, and every later stateful case removes its tasks before exiting. The runner compares complete standard output after normalizing platform line endings and trailing spaces. Leading whitespace remains significant. It stops immediately after the first failing case and records the visible session in `_temp/ui-test/session.log`.
 
 ## Test case: Add and list all task types
 
@@ -21,6 +21,7 @@ todo borrow book
 deadline return book /by 2019-12-02
 event project meeting /from 2019-08-06 /to 2019-08-07
 list
+mark 2
 bye
 ```
 
@@ -56,6 +57,68 @@ How can I help you?
                    1.[T][ ] borrow book
                    2.[D][ ] return book (by: Dec 02 2019)
                    3.[E][ ] project meeting (from: Aug 06 2019 to: Aug 07 2019)
+                   -----------------------------------
+                   -----------------------------------
+                   Nice! I've marked this task as done:
+                     [D][X] return book (by: Dec 02 2019)
+                   -----------------------------------
+                   -----------------------------------
+                   Bye, see you later!
+                   -----------------------------------
+```
+
+## Test case: Load saved tasks after restart
+
+### Aim
+
+Verify that a fresh Milo process loads each saved task type in order, including its completion state, and can continue modifying the loaded list.
+
+### Inputs
+
+```text
+list
+delete 3
+delete 2
+delete 1
+list
+bye
+```
+
+### Expected output
+
+```text
+ __  __ _ _
+|  \/  (_) | ___
+| |\/| | | |/ _ \
+| |  | | | | (_) |
+|_|  |_|_|_|\___/
+-----------------------------------
+Hello! I'm Milo.
+How can I help you?
+-----------------------------------
+                   -----------------------------------
+                   Here are the tasks in your list:
+                   1.[T][ ] borrow book
+                   2.[D][X] return book (by: Dec 02 2019)
+                   3.[E][ ] project meeting (from: Aug 06 2019 to: Aug 07 2019)
+                   -----------------------------------
+                   -----------------------------------
+                   Noted. I've removed this task:
+                     [E][ ] project meeting (from: Aug 06 2019 to: Aug 07 2019)
+                   Now you have 2 tasks in the list.
+                   -----------------------------------
+                   -----------------------------------
+                   Noted. I've removed this task:
+                     [D][X] return book (by: Dec 02 2019)
+                   Now you have 1 tasks in the list.
+                   -----------------------------------
+                   -----------------------------------
+                   Noted. I've removed this task:
+                     [T][ ] borrow book
+                   Now you have 0 tasks in the list.
+                   -----------------------------------
+                   -----------------------------------
+                   Here are the tasks in your list:
                    -----------------------------------
                    -----------------------------------
                    Bye, see you later!
@@ -161,6 +224,7 @@ Verify that `mark` changes the selected task to done and that `list` retains the
 todo read book
 mark 1
 list
+delete 1
 bye
 ```
 
@@ -190,6 +254,11 @@ How can I help you?
                    1.[T][X] read book
                    -----------------------------------
                    -----------------------------------
+                   Noted. I've removed this task:
+                     [T][X] read book
+                   Now you have 0 tasks in the list.
+                   -----------------------------------
+                   -----------------------------------
                    Bye, see you later!
                    -----------------------------------
 ```
@@ -207,6 +276,7 @@ todo read book
 mark 1
 unmark 1
 list
+delete 1
 bye
 ```
 
@@ -238,6 +308,11 @@ How can I help you?
                    -----------------------------------
                    Here are the tasks in your list:
                    1.[T][ ] read book
+                   -----------------------------------
+                   -----------------------------------
+                   Noted. I've removed this task:
+                     [T][ ] read book
+                   Now you have 0 tasks in the list.
                    -----------------------------------
                    -----------------------------------
                    Bye, see you later!
@@ -339,6 +414,9 @@ event project meeting /from 2026-08-29 /to 2026-08-30
 event lunch /from noon
 mark 3
 list
+delete 3
+delete 2
+delete 1
 bye
 ```
 
@@ -389,6 +467,21 @@ How can I help you?
                    3.[E][X] project meeting (from: Aug 29 2026 to: Aug 30 2026)
                    -----------------------------------
                    -----------------------------------
+                   Noted. I've removed this task:
+                     [E][X] project meeting (from: Aug 29 2026 to: Aug 30 2026)
+                   Now you have 2 tasks in the list.
+                   -----------------------------------
+                   -----------------------------------
+                   Noted. I've removed this task:
+                     [D][ ] submit report (by: Aug 28 2026)
+                   Now you have 1 tasks in the list.
+                   -----------------------------------
+                   -----------------------------------
+                   Noted. I've removed this task:
+                     [T][ ] read book
+                   Now you have 0 tasks in the list.
+                   -----------------------------------
+                   -----------------------------------
                    Bye, see you later!
                    -----------------------------------
 ```
@@ -413,6 +506,8 @@ mark
 mark 2
 unmark
 list
+delete 2
+delete 1
 bye
 ```
 
@@ -471,6 +566,16 @@ How can I help you?
                    2.[T][X] second task
                    -----------------------------------
                    -----------------------------------
+                   Noted. I've removed this task:
+                     [T][X] second task
+                   Now you have 1 tasks in the list.
+                   -----------------------------------
+                   -----------------------------------
+                   Noted. I've removed this task:
+                     [T][ ] first task
+                   Now you have 0 tasks in the list.
+                   -----------------------------------
+                   -----------------------------------
                    Bye, see you later!
                    -----------------------------------
 ```
@@ -490,6 +595,7 @@ list
 
 mark 1
 list
+delete 1
 bye
 ```
 
@@ -529,6 +635,11 @@ How can I help you?
                    1.[T][X] trim leading spaces
                    -----------------------------------
                    -----------------------------------
+                   Noted. I've removed this task:
+                     [T][X] trim leading spaces
+                   Now you have 0 tasks in the list.
+                   -----------------------------------
+                   -----------------------------------
                    Bye, see you later!
                    -----------------------------------
 ```
@@ -553,6 +664,10 @@ mark 4
 list
 delete 3
 list
+delete 4
+delete 3
+delete 2
+delete 1
 bye
 ```
 
@@ -624,6 +739,26 @@ How can I help you?
                    2.[D][X] return book (by: Jun 06 2026)
                    3.[T][X] join sports club
                    4.[T][ ] borrow book
+                   -----------------------------------
+                   -----------------------------------
+                   Noted. I've removed this task:
+                     [T][ ] borrow book
+                   Now you have 3 tasks in the list.
+                   -----------------------------------
+                   -----------------------------------
+                   Noted. I've removed this task:
+                     [T][X] join sports club
+                   Now you have 2 tasks in the list.
+                   -----------------------------------
+                   -----------------------------------
+                   Noted. I've removed this task:
+                     [D][X] return book (by: Jun 06 2026)
+                   Now you have 1 tasks in the list.
+                   -----------------------------------
+                   -----------------------------------
+                   Noted. I've removed this task:
+                     [T][X] read book
+                   Now you have 0 tasks in the list.
                    -----------------------------------
                    -----------------------------------
                    Bye, see you later!
