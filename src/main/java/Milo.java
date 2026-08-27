@@ -2,14 +2,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Runs the Milo chatbot and manages its in-memory task list.
@@ -18,13 +13,7 @@ public class Milo {
     private static final String DIVIDER = "-----------------------------------";
     private static final String INDENTBLOCK = "                   ";
     private static final Path DATA_FILE = Path.of("data", "duke.txt");
-    private static final DateTimeFormatter INPUT_DATE_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE;
     private static final List<Task> TASKS = new ArrayList<>();
-    private static final Pattern TODO_COMMAND = Pattern.compile("^todo\\s+(.+)$");
-    private static final Pattern DEADLINE_COMMAND = Pattern.compile(
-            "^deadline\\s+(.+?)\\s+/by\\s+(.+)$");
-    private static final Pattern EVENT_COMMAND = Pattern.compile(
-            "^event\\s+(.+?)\\s+/from\\s+(.+?)\\s+/to\\s+(.+)$");
 
     public static void main(String[] args) {
         TASKS.clear();
@@ -43,7 +32,7 @@ public class Milo {
         try (Scanner scanner = new Scanner(System.in)) {
             while (scanner.hasNextLine()) {
                 String command = scanner.nextLine().trim();
-                CommandType commandType = CommandType.from(command);
+                CommandType commandType = Parser.parseCommandType(command);
 
                 System.out.println(INDENTBLOCK + DIVIDER);
 
@@ -71,7 +60,7 @@ public class Milo {
                     case TODO:
                     case DEADLINE:
                     case EVENT:
-                        Task newTask = createTask(command, commandType);
+                        Task newTask = Parser.parseTask(command, commandType);
                         TASKS.add(newTask);
                         try {
                             saveTasks();
@@ -92,53 +81,6 @@ public class Milo {
 
                 System.out.println(INDENTBLOCK + DIVIDER);
             }
-        }
-    }
-
-    /**
-     * Creates a typed task from a todo, deadline, or event command.
-     *
-     * @param command full command entered by the user
-     * @param commandType type of task command being parsed
-     * @return the parsed task
-     * @throws MiloException if the command lacks required task details
-     */
-    private static Task createTask(String command, CommandType commandType)
-            throws MiloException {
-        Matcher todoMatcher = TODO_COMMAND.matcher(command);
-        if (todoMatcher.matches()) {
-            return new Todo(todoMatcher.group(1));
-        }
-
-        Matcher deadlineMatcher = DEADLINE_COMMAND.matcher(command);
-        if (deadlineMatcher.matches()) {
-            return new Deadline(deadlineMatcher.group(1), parseDate(deadlineMatcher.group(2)));
-        }
-
-        Matcher eventMatcher = EVENT_COMMAND.matcher(command);
-        if (eventMatcher.matches()) {
-            return new Event(eventMatcher.group(1), parseDate(eventMatcher.group(2)),
-                    parseDate(eventMatcher.group(3)));
-        }
-
-        if (commandType == CommandType.TODO) {
-            throw new MiloException("A todo needs a description.");
-        } else if (commandType == CommandType.DEADLINE) {
-            throw new MiloException(
-                    "A deadline needs a description followed by /by and a date or time.");
-        } else if (commandType == CommandType.EVENT) {
-            throw new MiloException(
-                    "An event needs a description, /from start, and /to end.");
-        }
-        throw new IllegalStateException("Not a task command: " + commandType);
-    }
-
-    /** Parses a date in ISO format and converts malformed input into a user-facing error. */
-    private static LocalDate parseDate(String dateText) throws MiloException {
-        try {
-            return LocalDate.parse(dateText, INPUT_DATE_FORMAT);
-        } catch (DateTimeParseException exception) {
-            throw new MiloException("Dates must use the format yyyy-MM-dd.");
         }
     }
 
@@ -164,7 +106,7 @@ public class Milo {
     private static void setTaskDoneStatus(String command, boolean isDone)
             throws MiloException {
         String action = isDone ? "mark" : "unmark";
-        int taskIndex = parseTaskIndex(command, action);
+        int taskIndex = Parser.parseTaskIndex(command, action, TASKS.size());
         Task selectedTask = TASKS.get(taskIndex);
         if (isDone) {
             selectedTask.markAsDone();
@@ -193,7 +135,7 @@ public class Milo {
      * @throws MiloException if the task number is missing, invalid, or outside the list
      */
     private static void deleteTask(String command) throws MiloException {
-        int taskIndex = parseTaskIndex(command, "delete");
+        int taskIndex = Parser.parseTaskIndex(command, "delete", TASKS.size());
         Task deletedTask = TASKS.remove(taskIndex);
         try {
             saveTasks();
@@ -205,32 +147,6 @@ public class Milo {
         System.out.println(INDENTBLOCK + "  " + deletedTask);
         System.out.println(INDENTBLOCK + "Now you have " + TASKS.size()
                 + " tasks in the list.");
-    }
-
-    /**
-     * Parses and validates the one-based task number used by a task command.
-     *
-     * @param command full command entered by the user
-     * @param action command word whose argument should be parsed
-     * @return zero-based index of the selected task
-     * @throws MiloException if the task number is missing, invalid, or outside the list
-     */
-    private static int parseTaskIndex(String command, String action)
-            throws MiloException {
-        String taskNumberText = command.substring(action.length()).trim();
-        int taskNumber;
-
-        try {
-            taskNumber = Integer.parseInt(taskNumberText);
-        } catch (NumberFormatException exception) {
-            throw new MiloException("Please specify a task number, for example: "
-                    + action + " 2");
-        }
-
-        if (taskNumber < 1 || taskNumber > TASKS.size()) {
-            throw new MiloException("There is no task numbered " + taskNumber + ".");
-        }
-        return taskNumber - 1;
     }
 
     /** Saves the current task list in a simple line-based format. */
