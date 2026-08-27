@@ -1,8 +1,11 @@
-import java.util.ArrayList;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -15,6 +18,7 @@ public class Milo {
     private static final String DIVIDER = "-----------------------------------";
     private static final String INDENTBLOCK = "                   ";
     private static final Path DATA_FILE = Path.of("data", "duke.txt");
+    private static final DateTimeFormatter INPUT_DATE_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE;
     private static final List<Task> TASKS = new ArrayList<>();
     private static final Pattern TODO_COMMAND = Pattern.compile("^todo\\s+(.+)$");
     private static final Pattern DEADLINE_COMMAND = Pattern.compile(
@@ -108,12 +112,13 @@ public class Milo {
 
         Matcher deadlineMatcher = DEADLINE_COMMAND.matcher(command);
         if (deadlineMatcher.matches()) {
-            return new Deadline(deadlineMatcher.group(1), deadlineMatcher.group(2));
+            return new Deadline(deadlineMatcher.group(1), parseDate(deadlineMatcher.group(2)));
         }
 
         Matcher eventMatcher = EVENT_COMMAND.matcher(command);
         if (eventMatcher.matches()) {
-            return new Event(eventMatcher.group(1), eventMatcher.group(2), eventMatcher.group(3));
+            return new Event(eventMatcher.group(1), parseDate(eventMatcher.group(2)),
+                    parseDate(eventMatcher.group(3)));
         }
 
         if (commandType == CommandType.TODO) {
@@ -126,6 +131,15 @@ public class Milo {
                     "An event needs a description, /from start, and /to end.");
         }
         throw new IllegalStateException("Not a task command: " + commandType);
+    }
+
+    /** Parses a date in ISO format and converts malformed input into a user-facing error. */
+    private static LocalDate parseDate(String dateText) throws MiloException {
+        try {
+            return LocalDate.parse(dateText, INPUT_DATE_FORMAT);
+        } catch (DateTimeParseException exception) {
+            throw new MiloException("Dates must use the format yyyy-MM-dd.");
+        }
     }
 
     /**

@@ -18,8 +18,8 @@ Verify that todos, deadlines, and events retain their type-specific details and 
 
 ```text
 todo borrow book
-deadline return book /by Sunday
-event project meeting /from Mon 2pm /to 4pm
+deadline return book /by 2019-12-02
+event project meeting /from 2019-08-06 /to 2019-08-07
 list
 bye
 ```
@@ -43,19 +43,60 @@ How can I help you?
                    -----------------------------------
                    -----------------------------------
                    Got it. I've added this task:
-                     [D][ ] return book (by: Sunday)
+                     [D][ ] return book (by: Dec 02 2019)
                    Now you have 2 tasks in the list.
                    -----------------------------------
                    -----------------------------------
                    Got it. I've added this task:
-                     [E][ ] project meeting (from: Mon 2pm to: 4pm)
+                     [E][ ] project meeting (from: Aug 06 2019 to: Aug 07 2019)
                    Now you have 3 tasks in the list.
                    -----------------------------------
                    -----------------------------------
                    Here are the tasks in your list:
                    1.[T][ ] borrow book
-                   2.[D][ ] return book (by: Sunday)
-                   3.[E][ ] project meeting (from: Mon 2pm to: 4pm)
+                   2.[D][ ] return book (by: Dec 02 2019)
+                   3.[E][ ] project meeting (from: Aug 06 2019 to: Aug 07 2019)
+                   -----------------------------------
+                   -----------------------------------
+                   Bye, see you later!
+                   -----------------------------------
+```
+
+## Test case: Reject invalid dates
+
+### Aim
+
+Verify that deadlines and events reject malformed or impossible dates without adding tasks.
+
+### Inputs
+
+```text
+deadline return book /by 2019-02-29
+event project meeting /from 2019-10-15 /to 15/10/2019
+list
+bye
+```
+
+### Expected output
+
+```text
+ __  __ _ _
+|  \/  (_) | ___
+| |\/| | | |/ _ \
+| |  | | | | (_) |
+|_|  |_|_|_|\___/ 
+-----------------------------------
+Hello! I'm Milo.
+How can I help you?
+-----------------------------------
+                   -----------------------------------
+                   OOPS!!! Dates must use the format yyyy-MM-dd.
+                   -----------------------------------
+                   -----------------------------------
+                   OOPS!!! Dates must use the format yyyy-MM-dd.
+                   -----------------------------------
+                   -----------------------------------
+                   Here are the tasks in your list:
                    -----------------------------------
                    -----------------------------------
                    Bye, see you later!
@@ -84,7 +125,7 @@ bye
 |  \/  (_) | ___
 | |\/| | | |/ _ \
 | |  | | | | (_) |
-|_|  |_|_|_|\___/ 
+|_|  |_|_|_|\___/
 -----------------------------------
 Hello! I'm Milo.
 How can I help you?
@@ -292,9 +333,9 @@ Verify that invalid task commands interleaved with valid additions do not consum
 ```text
 todo read book
 todo
-deadline submit report /by Friday
+deadline submit report /by 2026-08-28
 deadline prepare slides
-event project meeting /from 2pm /to 4pm
+event project meeting /from 2026-08-29 /to 2026-08-30
 event lunch /from noon
 mark 3
 list
@@ -323,7 +364,7 @@ How can I help you?
                    -----------------------------------
                    -----------------------------------
                    Got it. I've added this task:
-                     [D][ ] submit report (by: Friday)
+                     [D][ ] submit report (by: Aug 28 2026)
                    Now you have 2 tasks in the list.
                    -----------------------------------
                    -----------------------------------
@@ -331,7 +372,7 @@ How can I help you?
                    -----------------------------------
                    -----------------------------------
                    Got it. I've added this task:
-                     [E][ ] project meeting (from: 2pm to: 4pm)
+                     [E][ ] project meeting (from: Aug 29 2026 to: Aug 30 2026)
                    Now you have 3 tasks in the list.
                    -----------------------------------
                    -----------------------------------
@@ -339,13 +380,13 @@ How can I help you?
                    -----------------------------------
                    -----------------------------------
                    Nice! I've marked this task as done:
-                     [E][X] project meeting (from: 2pm to: 4pm)
+                     [E][X] project meeting (from: Aug 29 2026 to: Aug 30 2026)
                    -----------------------------------
                    -----------------------------------
                    Here are the tasks in your list:
                    1.[T][ ] read book
-                   2.[D][ ] submit report (by: Friday)
-                   3.[E][X] project meeting (from: 2pm to: 4pm)
+                   2.[D][ ] submit report (by: Aug 28 2026)
+                   3.[E][X] project meeting (from: Aug 29 2026 to: Aug 30 2026)
                    -----------------------------------
                    -----------------------------------
                    Bye, see you later!
@@ -502,8 +543,8 @@ Verify that deleting a typed task reports the removed task, reduces the count, a
 
 ```text
 todo read book
-deadline return book /by June 6th
-event project meeting /from Aug 6th 2pm /to 4pm
+deadline return book /by 2026-06-06
+event project meeting /from 2026-08-06 /to 2026-08-07
 todo join sports club
 todo borrow book
 mark 1
@@ -534,12 +575,12 @@ How can I help you?
                    -----------------------------------
                    -----------------------------------
                    Got it. I've added this task:
-                     [D][ ] return book (by: June 6th)
+                     [D][ ] return book (by: Jun 06 2026)
                    Now you have 2 tasks in the list.
                    -----------------------------------
                    -----------------------------------
                    Got it. I've added this task:
-                     [E][ ] project meeting (from: Aug 6th 2pm to: 4pm)
+                     [E][ ] project meeting (from: Aug 06 2026 to: Aug 07 2026)
                    Now you have 3 tasks in the list.
                    -----------------------------------
                    -----------------------------------
@@ -558,7 +599,7 @@ How can I help you?
                    -----------------------------------
                    -----------------------------------
                    Nice! I've marked this task as done:
-                     [D][X] return book (by: June 6th)
+                     [D][X] return book (by: Jun 06 2026)
                    -----------------------------------
                    -----------------------------------
                    Nice! I've marked this task as done:
@@ -567,20 +608,20 @@ How can I help you?
                    -----------------------------------
                    Here are the tasks in your list:
                    1.[T][X] read book
-                   2.[D][X] return book (by: June 6th)
-                   3.[E][ ] project meeting (from: Aug 6th 2pm to: 4pm)
+                   2.[D][X] return book (by: Jun 06 2026)
+                   3.[E][ ] project meeting (from: Aug 06 2026 to: Aug 07 2026)
                    4.[T][X] join sports club
                    5.[T][ ] borrow book
                    -----------------------------------
                    -----------------------------------
                    Noted. I've removed this task:
-                     [E][ ] project meeting (from: Aug 6th 2pm to: 4pm)
+                     [E][ ] project meeting (from: Aug 06 2026 to: Aug 07 2026)
                    Now you have 4 tasks in the list.
                    -----------------------------------
                    -----------------------------------
                    Here are the tasks in your list:
                    1.[T][X] read book
-                   2.[D][X] return book (by: June 6th)
+                   2.[D][X] return book (by: Jun 06 2026)
                    3.[T][X] join sports club
                    4.[T][ ] borrow book
                    -----------------------------------
