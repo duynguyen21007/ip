@@ -86,12 +86,20 @@ public class TaskList {
         return task;
     }
 
-    /** Returns the number of tasks in the list. */
+    /**
+     * Returns the number of tasks in the list.
+     *
+     * @return number of tasks
+     */
     public int size() {
         return tasks.size();
     }
 
-    /** Returns an immutable snapshot of the tasks in their current order. */
+    /**
+     * Returns an immutable snapshot of the tasks in their current order.
+     *
+     * @return immutable snapshot of the tasks
+     */
     public List<Task> getTasks() {
         return List.copyOf(tasks);
     }

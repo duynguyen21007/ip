@@ -30,6 +30,10 @@ public class Parser {
     private static final Pattern EVENT_COMMAND = Pattern.compile(
             "^event\\s+(.+?)\\s+/from\\s+(.+?)\\s+/to\\s+(.+)$");
 
+    /** Creates a parser. */
+    public Parser() {
+    }
+
     /**
      * Interprets a full user command and creates the command that can execute it.
      *
