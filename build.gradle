@@ -49,6 +49,9 @@ jar {
 
 shadowJar {
     archiveFileName = 'duke.jar'
+    manifest {
+        attributes 'Main-Class': application.mainClass.get()
+    }
 }
 
 run {

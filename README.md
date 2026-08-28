@@ -23,3 +23,27 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
    ```
 
 **Warning:** Keep the `src\main\java` folder as the root folder for Java files (i.e., don't rename those folders or move Java files to another folder outside of this folder path), as this is the default location some tools (e.g., Gradle) expect to find Java files.
+
+## Building and running the fat JAR
+
+The Shadow plugin packages Milo and its runtime dependencies into one executable JAR. Use JDK 25 and run the commands from the project root.
+
+On Windows PowerShell, create the JAR with:
+
+```powershell
+.\gradlew.bat clean shadowJar
+```
+
+On macOS or Linux, create it with:
+
+```bash
+./gradlew clean shadowJar
+```
+
+Gradle writes the resulting JAR to `build/libs/duke.jar`. Run it from the project root with:
+
+```powershell
+java -jar build/libs/duke.jar
+```
+
+Milo reads and writes `data/duke.txt` relative to the directory from which the JAR is run.
