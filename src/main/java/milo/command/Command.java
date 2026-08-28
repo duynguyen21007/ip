@@ -10,6 +10,10 @@ import milo.ui.Ui;
  */
 public abstract class Command {
 
+    /** Creates a command. */
+    public Command() {
+    }
+
     /**
      * Performs this command using Milo's task list, UI, and storage.
      *
@@ -20,7 +24,11 @@ public abstract class Command {
      */
     public abstract void execute(TaskList tasks, Ui ui, Storage storage) throws MiloException;
 
-    /** Returns whether executing this command should end the application. */
+    /**
+     * Returns whether executing this command should end the application.
+     *
+     * @return {@code true} if this command ends the application, otherwise {@code false}
+     */
     public boolean isExit() {
         return false;
     }

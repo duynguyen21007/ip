@@ -34,12 +34,20 @@ public class Ui implements AutoCloseable {
         System.out.println(BANNER + greeting);
     }
 
-    /** Returns whether another command is available from standard input. */
+    /**
+     * Returns whether another command is available from standard input.
+     *
+     * @return {@code true} if another command is available, otherwise {@code false}
+     */
     public boolean hasNextCommand() {
         return scanner.hasNextLine();
     }
 
-    /** Returns the next command with surrounding whitespace removed. */
+    /**
+     * Returns the next command with surrounding whitespace removed.
+     *
+     * @return next trimmed command
+     */
     public String readCommand() {
         return scanner.nextLine().trim();
     }

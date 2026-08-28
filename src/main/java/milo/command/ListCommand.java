@@ -9,6 +9,10 @@ import milo.ui.Ui;
  */
 public class ListCommand extends Command {
 
+    /** Creates a command that lists all tasks. */
+    public ListCommand() {
+    }
+
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) {
         ui.showTaskList(tasks);

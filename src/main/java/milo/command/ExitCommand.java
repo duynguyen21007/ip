@@ -9,6 +9,10 @@ import milo.ui.Ui;
  */
 public class ExitCommand extends Command {
 
+    /** Creates a command that exits Milo. */
+    public ExitCommand() {
+    }
+
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) {
         ui.showGoodbye();
