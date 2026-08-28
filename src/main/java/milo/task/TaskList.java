@@ -86,6 +86,19 @@ public class TaskList {
         return task;
     }
 
+    /**
+     * Returns tasks whose descriptions contain the keyword, preserving their order.
+     *
+     * @param keyword non-empty keyword for which to search.
+     * @return new task list containing the matching tasks.
+     */
+    public TaskList find(String keyword) {
+        List<Task> matchingTasks = tasks.stream()
+                .filter(task -> task.hasKeyword(keyword))
+                .toList();
+        return new TaskList(matchingTasks);
+    }
+
     /** Returns the number of tasks in the list. */
     public int size() {
         return tasks.size();

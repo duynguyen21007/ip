@@ -847,3 +847,94 @@ How can I help you?
                    Bye, see you later!
                    -----------------------------------
 ```
+
+## Test case: Find tasks by keyword
+
+### Aim
+
+Verify that `find` matches descriptions case-insensitively in their original order, supports multi-word keywords, handles no matches and missing keywords, and leaves the task list unchanged.
+
+### Inputs
+
+```text
+todo borrow book
+deadline return BOOK /by 2026-10-01
+event project meeting /from 2026-10-02 /to 2026-10-03
+find book
+find project meeting
+find missing
+find
+list
+delete 3
+delete 2
+delete 1
+bye
+```
+
+### Expected output
+
+```text
+ __  __ _ _
+|  \/  (_) | ___
+| |\/| | | |/ _ \
+| |  | | | | (_) |
+|_|  |_|_|_|\___/
+-----------------------------------
+Hello! I'm Milo.
+How can I help you?
+-----------------------------------
+                   -----------------------------------
+                   Got it. I've added this task:
+                     [T][ ] borrow book
+                   Now you have 1 tasks in the list.
+                   -----------------------------------
+                   -----------------------------------
+                   Got it. I've added this task:
+                     [D][ ] return BOOK (by: Oct 01 2026)
+                   Now you have 2 tasks in the list.
+                   -----------------------------------
+                   -----------------------------------
+                   Got it. I've added this task:
+                     [E][ ] project meeting (from: Oct 02 2026 to: Oct 03 2026)
+                   Now you have 3 tasks in the list.
+                   -----------------------------------
+                   -----------------------------------
+                   Here are the matching tasks in your list:
+                   1.[T][ ] borrow book
+                   2.[D][ ] return BOOK (by: Oct 01 2026)
+                   -----------------------------------
+                   -----------------------------------
+                   Here are the matching tasks in your list:
+                   1.[E][ ] project meeting (from: Oct 02 2026 to: Oct 03 2026)
+                   -----------------------------------
+                   -----------------------------------
+                   Here are the matching tasks in your list:
+                   -----------------------------------
+                   -----------------------------------
+                   OOPS!!! Please specify a keyword to find.
+                   -----------------------------------
+                   -----------------------------------
+                   Here are the tasks in your list:
+                   1.[T][ ] borrow book
+                   2.[D][ ] return BOOK (by: Oct 01 2026)
+                   3.[E][ ] project meeting (from: Oct 02 2026 to: Oct 03 2026)
+                   -----------------------------------
+                   -----------------------------------
+                   Noted. I've removed this task:
+                     [E][ ] project meeting (from: Oct 02 2026 to: Oct 03 2026)
+                   Now you have 2 tasks in the list.
+                   -----------------------------------
+                   -----------------------------------
+                   Noted. I've removed this task:
+                     [D][ ] return BOOK (by: Oct 01 2026)
+                   Now you have 1 tasks in the list.
+                   -----------------------------------
+                   -----------------------------------
+                   Noted. I've removed this task:
+                     [T][ ] borrow book
+                   Now you have 0 tasks in the list.
+                   -----------------------------------
+                   -----------------------------------
+                   Bye, see you later!
+                   -----------------------------------
+```

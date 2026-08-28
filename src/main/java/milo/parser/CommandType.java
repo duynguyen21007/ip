@@ -6,6 +6,7 @@ package milo.parser;
 public enum CommandType {
     BYE,
     LIST,
+    FIND,
     MARK,
     UNMARK,
     DELETE,

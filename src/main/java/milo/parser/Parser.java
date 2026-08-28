@@ -10,6 +10,7 @@ import milo.command.AddCommand;
 import milo.command.Command;
 import milo.command.DeleteCommand;
 import milo.command.ExitCommand;
+import milo.command.FindCommand;
 import milo.command.ListCommand;
 import milo.command.MarkCommand;
 import milo.command.UnmarkCommand;
@@ -40,24 +41,28 @@ public class Parser {
     public static Command parse(String command) throws MiloException {
         CommandType commandType = parseCommandType(command);
         switch (commandType) {
-        case BYE:
-            return new ExitCommand();
-        case LIST:
-            return new ListCommand();
-        case MARK:
-            return new MarkCommand(parseTaskNumber(command, "mark"));
-        case UNMARK:
-            return new UnmarkCommand(parseTaskNumber(command, "unmark"));
-        case DELETE:
-            return new DeleteCommand(parseTaskNumber(command, "delete"));
-        case TODO:
-        case DEADLINE:
-        case EVENT:
-            return new AddCommand(parseTask(command, commandType));
-        case UNKNOWN:
-            throw new MiloException("I don't recognize that command :-(");
-        default:
-            throw new IllegalStateException("Unhandled command type: " + commandType);
+            case BYE:
+                return new ExitCommand();
+            case LIST:
+                return new ListCommand();
+            case FIND:
+                return new FindCommand(parseKeyword(command));
+            case MARK:
+                return new MarkCommand(parseTaskNumber(command, "mark"));
+            case UNMARK:
+                return new UnmarkCommand(parseTaskNumber(command, "unmark"));
+            case DELETE:
+                return new DeleteCommand(parseTaskNumber(command, "delete"));
+            case TODO:
+                // Fallthrough
+            case DEADLINE:
+                // Fallthrough
+            case EVENT:
+                return new AddCommand(parseTask(command, commandType));
+            case UNKNOWN:
+                throw new MiloException("I don't recognize that command :-(");
+            default:
+                throw new IllegalStateException("Unhandled command type: " + commandType);
         }
     }
 
@@ -67,6 +72,8 @@ public class Parser {
             return CommandType.BYE;
         } else if (command.equals("list")) {
             return CommandType.LIST;
+        } else if (hasCommandWord(command, "find")) {
+            return CommandType.FIND;
         } else if (hasCommandWord(command, "mark")) {
             return CommandType.MARK;
         } else if (hasCommandWord(command, "unmark")) {
@@ -81,6 +88,21 @@ public class Parser {
             return CommandType.EVENT;
         }
         return CommandType.UNKNOWN;
+    }
+
+    /**
+     * Extracts the non-empty keyword from a find command.
+     *
+     * @param command full command entered by the user.
+     * @return keyword for which to search.
+     * @throws MiloException if the command does not contain a keyword.
+     */
+    private static String parseKeyword(String command) throws MiloException {
+        String keyword = command.substring("find".length()).trim();
+        if (keyword.isEmpty()) {
+            throw new MiloException("Please specify a keyword to find.");
+        }
+        return keyword;
     }
 
     /**
