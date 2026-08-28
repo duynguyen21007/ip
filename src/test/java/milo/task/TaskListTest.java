@@ -231,6 +231,58 @@ public class TaskListTest {
     }
 
     @Test
+    public void find_matchingSubstring_returnsMatchesInOriginalOrder() {
+        Task firstMatch = new Todo("borrow book");
+        Task nonMatch = new Todo("project meeting");
+        Task secondMatch = new Todo("return book");
+        TaskList tasks = new TaskList(List.of(firstMatch, nonMatch, secondMatch));
+
+        TaskList matchingTasks = tasks.find("book");
+
+        assertListContainsTasks(matchingTasks, firstMatch, secondMatch);
+        assertListContainsTasks(tasks, firstMatch, nonMatch, secondMatch);
+    }
+
+    @Test
+    public void find_mixedCaseKeyword_matchesIgnoringCase() {
+        Task upperCaseTask = new Todo("RETURN BOOK");
+        TaskList tasks = new TaskList(List.of(upperCaseTask));
+
+        TaskList matchingTasks = tasks.find("book");
+
+        assertListContainsTasks(matchingTasks, upperCaseTask);
+    }
+
+    @Test
+    public void find_noMatchingTasks_returnsEmptyList() {
+        TaskList tasks = createThreeTaskList();
+
+        TaskList matchingTasks = tasks.find("missing");
+
+        assertListContainsTasks(matchingTasks);
+    }
+
+    @Test
+    public void find_emptyList_returnsEmptyList() {
+        TaskList tasks = new TaskList();
+
+        TaskList matchingTasks = tasks.find("task");
+
+        assertListContainsTasks(matchingTasks);
+    }
+
+    @Test
+    public void find_resultModified_originalListUnchanged() {
+        TaskList tasks = createThreeTaskList();
+        TaskList matchingTasks = tasks.find("task");
+
+        matchingTasks.delete(0);
+
+        assertListContainsTasks(tasks, firstTask, secondTask, thirdTask);
+        assertListContainsTasks(matchingTasks, secondTask, thirdTask);
+    }
+
+    @Test
     public void size_listMutations_returnsCurrentTaskCount() {
         TaskList tasks = new TaskList();
 

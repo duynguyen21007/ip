@@ -1,5 +1,7 @@
 package milo.task;
 
+import java.util.Locale;
+
 /**
  * Represents a task with a description and completion status.
  */
@@ -37,6 +39,13 @@ public class Task {
     /** Marks this task as not done. */
     public void markAsNotDone() {
         isDone = false;
+    }
+
+    /** Returns whether the description contains the keyword, ignoring letter case. */
+    boolean hasKeyword(String keyword) {
+        String normalizedDescription = description.toLowerCase(Locale.ROOT);
+        String normalizedKeyword = keyword.toLowerCase(Locale.ROOT);
+        return normalizedDescription.contains(normalizedKeyword);
     }
 
     /**

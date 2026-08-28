@@ -69,9 +69,17 @@ public class Ui implements AutoCloseable {
      */
     public void showTaskList(TaskList tasks) {
         System.out.println(INDENT_BLOCK + "Here are the tasks in your list:");
-        for (int i = 0; i < tasks.size(); i++) {
-            System.out.println(INDENT_BLOCK + (i + 1) + "." + tasks.get(i));
-        }
+        showNumberedTasks(tasks);
+    }
+
+    /**
+     * Shows tasks matching a find command with new one-based result numbers.
+     *
+     * @param matchingTasks matching tasks to show.
+     */
+    public void showMatchingTasks(TaskList matchingTasks) {
+        System.out.println(INDENT_BLOCK + "Here are the matching tasks in your list:");
+        showNumberedTasks(matchingTasks);
     }
 
     /**
@@ -126,6 +134,13 @@ public class Ui implements AutoCloseable {
      */
     public void showError(String message) {
         System.out.println(INDENT_BLOCK + "OOPS!!! " + message);
+    }
+
+    /** Shows tasks with one-based numbers. */
+    private void showNumberedTasks(TaskList tasks) {
+        for (int i = 0; i < tasks.size(); i++) {
+            System.out.println(INDENT_BLOCK + (i + 1) + "." + tasks.get(i));
+        }
     }
 
     @Override
