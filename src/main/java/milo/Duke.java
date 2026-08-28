@@ -11,7 +11,7 @@ public class Duke {
     /**
      * Prints the Duke banner.
      *
-     * @param args command-line arguments, which are not used
+     * @param args command-line arguments, which are not used.
      */
     public static void main(String[] args) {
         String banner = " ____        _        \n"

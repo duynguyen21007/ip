@@ -14,7 +14,7 @@ public class UnmarkCommand extends TaskCommand {
     /**
      * Creates a command that unmarks the task at the given one-based number.
      *
-     * @param taskNumber one-based number of the task to unmark
+     * @param taskNumber one-based number of the task to unmark.
      */
     public UnmarkCommand(int taskNumber) {
         super(taskNumber);

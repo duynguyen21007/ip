@@ -18,7 +18,7 @@ public class Milo {
     /**
      * Creates Milo and loads its saved tasks.
      *
-     * @param filePath path of the task data file
+     * @param filePath path of the task data file.
      */
     public Milo(String filePath) {
         this.storage = new Storage(filePath);
@@ -60,10 +60,9 @@ public class Milo {
     /**
      * Starts Milo using the default task data file.
      *
-     * @param args command-line arguments, which are not used
+     * @param args command-line arguments, which are not used.
      */
     public static void main(String[] args) {
         new Milo("data/duke.txt").run();
     }
-
 }

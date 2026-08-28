@@ -14,7 +14,7 @@ public class DeleteCommand extends TaskCommand {
     /**
      * Creates a command that deletes the task at the given one-based number.
      *
-     * @param taskNumber one-based number of the task to delete
+     * @param taskNumber one-based number of the task to delete.
      */
     public DeleteCommand(int taskNumber) {
         super(taskNumber);
