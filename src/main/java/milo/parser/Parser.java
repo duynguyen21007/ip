@@ -33,31 +33,33 @@ public class Parser {
     /**
      * Interprets a full user command and creates the command that can execute it.
      *
-     * @param command trimmed command entered by the user
-     * @return executable command
-     * @throws MiloException if the command or its arguments are invalid
+     * @param command trimmed command entered by the user.
+     * @return executable command.
+     * @throws MiloException if the command or its arguments are invalid.
      */
     public static Command parse(String command) throws MiloException {
         CommandType commandType = parseCommandType(command);
         switch (commandType) {
-        case BYE:
-            return new ExitCommand();
-        case LIST:
-            return new ListCommand();
-        case MARK:
-            return new MarkCommand(parseTaskNumber(command, "mark"));
-        case UNMARK:
-            return new UnmarkCommand(parseTaskNumber(command, "unmark"));
-        case DELETE:
-            return new DeleteCommand(parseTaskNumber(command, "delete"));
-        case TODO:
-        case DEADLINE:
-        case EVENT:
-            return new AddCommand(parseTask(command, commandType));
-        case UNKNOWN:
-            throw new MiloException("I don't recognize that command :-(");
-        default:
-            throw new IllegalStateException("Unhandled command type: " + commandType);
+            case BYE:
+                return new ExitCommand();
+            case LIST:
+                return new ListCommand();
+            case MARK:
+                return new MarkCommand(parseTaskNumber(command, "mark"));
+            case UNMARK:
+                return new UnmarkCommand(parseTaskNumber(command, "unmark"));
+            case DELETE:
+                return new DeleteCommand(parseTaskNumber(command, "delete"));
+            case TODO:
+                // Fallthrough
+            case DEADLINE:
+                // Fallthrough
+            case EVENT:
+                return new AddCommand(parseTask(command, commandType));
+            case UNKNOWN:
+                throw new MiloException("I don't recognize that command :-(");
+            default:
+                throw new IllegalStateException("Unhandled command type: " + commandType);
         }
     }
 
@@ -86,10 +88,10 @@ public class Parser {
     /**
      * Creates a typed task from a todo, deadline, or event command.
      *
-     * @param command full command entered by the user
-     * @param commandType type of task command being parsed
-     * @return parsed task
-     * @throws MiloException if the command lacks required task details
+     * @param command full command entered by the user.
+     * @param commandType type of task command being parsed.
+     * @return parsed task.
+     * @throws MiloException if the command lacks required task details.
      */
     private static Task parseTask(String command, CommandType commandType) throws MiloException {
         Matcher todoMatcher = TODO_COMMAND.matcher(command);
@@ -123,10 +125,10 @@ public class Parser {
     /**
      * Parses the one-based task number used by a task command.
      *
-     * @param command full command entered by the user
-     * @param action command word whose argument should be parsed
-     * @return one-based number of the selected task
-     * @throws MiloException if the task number is missing or invalid
+     * @param command full command entered by the user.
+     * @param action command word whose argument should be parsed.
+     * @return one-based number of the selected task.
+     * @throws MiloException if the task number is missing or invalid.
      */
     private static int parseTaskNumber(String command, String action) throws MiloException {
         String taskNumberText = command.substring(action.length()).trim();

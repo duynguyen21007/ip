@@ -10,7 +10,7 @@ public class Task {
     /**
      * Creates an incomplete task with the given description.
      *
-     * @param description description of the task
+     * @param description description of the task.
      */
     public Task(String description) {
         this.description = description;
@@ -20,7 +20,7 @@ public class Task {
     /**
      * Returns the character used to display the task's completion status.
      *
-     * @return {@code X} when done, or a space when not done
+     * @return {@code X} when done, or a space when not done.
      */
     public String getStatusIcon() {
         return isDone ? "X" : " ";
@@ -39,7 +39,7 @@ public class Task {
     /**
      * Returns the task in the format used by Milo's task list.
      *
-     * @return status icon followed by the task description
+     * @return status icon followed by the task description.
      */
     @Override
     public String toString() {

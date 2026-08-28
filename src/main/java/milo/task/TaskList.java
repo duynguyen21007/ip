@@ -17,7 +17,7 @@ public class TaskList {
     /**
      * Creates a task list containing the supplied tasks in their existing order.
      *
-     * @param tasks tasks with which to initialize the list
+     * @param tasks tasks with which to initialize the list.
      */
     public TaskList(List<Task> tasks) {
         this.tasks = new ArrayList<>(tasks);
@@ -26,7 +26,7 @@ public class TaskList {
     /**
      * Adds a task to the end of the list.
      *
-     * @param task task to add
+     * @param task task to add.
      */
     public void add(Task task) {
         tasks.add(task);
@@ -35,8 +35,8 @@ public class TaskList {
     /**
      * Restores a task at a specific position in the list.
      *
-     * @param index zero-based position at which to add the task
-     * @param task task to add
+     * @param index zero-based position at which to add the task.
+     * @param task task to add.
      */
     public void add(int index, Task task) {
         tasks.add(index, task);
@@ -45,8 +45,8 @@ public class TaskList {
     /**
      * Removes and returns the task at a specific position.
      *
-     * @param index zero-based position of the task to remove
-     * @return removed task
+     * @param index zero-based position of the task to remove.
+     * @return removed task.
      */
     public Task delete(int index) {
         return tasks.remove(index);
@@ -55,8 +55,8 @@ public class TaskList {
     /**
      * Returns the task at a specific position.
      *
-     * @param index zero-based position of the task
-     * @return selected task
+     * @param index zero-based position of the task.
+     * @return selected task.
      */
     public Task get(int index) {
         return tasks.get(index);
@@ -65,8 +65,8 @@ public class TaskList {
     /**
      * Marks and returns the task at a specific position.
      *
-     * @param index zero-based position of the task
-     * @return marked task
+     * @param index zero-based position of the task.
+     * @return marked task.
      */
     public Task mark(int index) {
         Task task = tasks.get(index);
@@ -77,8 +77,8 @@ public class TaskList {
     /**
      * Unmarks and returns the task at a specific position.
      *
-     * @param index zero-based position of the task
-     * @return unmarked task
+     * @param index zero-based position of the task.
+     * @return unmarked task.
      */
     public Task unmark(int index) {
         Task task = tasks.get(index);

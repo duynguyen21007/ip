@@ -57,7 +57,7 @@ public class Ui implements AutoCloseable {
     /**
      * Shows every task with its one-based list number.
      *
-     * @param tasks tasks to show
+     * @param tasks tasks to show.
      */
     public void showTaskList(TaskList tasks) {
         System.out.println(INDENT_BLOCK + "Here are the tasks in your list:");
@@ -69,8 +69,8 @@ public class Ui implements AutoCloseable {
     /**
      * Shows confirmation that a task was added.
      *
-     * @param task task that was added
-     * @param taskCount number of tasks after the addition
+     * @param task task that was added.
+     * @param taskCount number of tasks after the addition.
      */
     public void showTaskAdded(Task task, int taskCount) {
         System.out.println(INDENT_BLOCK + "Got it. I've added this task:");
@@ -92,7 +92,7 @@ public class Ui implements AutoCloseable {
     /**
      * Shows a task indented beneath a response heading.
      *
-     * @param task task to show
+     * @param task task to show.
      */
     public void showTask(Task task) {
         System.out.println(INDENT_BLOCK + "  " + task);
@@ -101,8 +101,8 @@ public class Ui implements AutoCloseable {
     /**
      * Shows confirmation that a task was deleted.
      *
-     * @param task task that was deleted
-     * @param taskCount number of tasks after the deletion
+     * @param task task that was deleted.
+     * @param taskCount number of tasks after the deletion.
      */
     public void showTaskDeleted(Task task, int taskCount) {
         System.out.println(INDENT_BLOCK + "Noted. I've removed this task:");
@@ -114,7 +114,7 @@ public class Ui implements AutoCloseable {
     /**
      * Shows a recoverable error to the user.
      *
-     * @param message explanation of the error
+     * @param message explanation of the error.
      */
     public void showError(String message) {
         System.out.println(INDENT_BLOCK + "OOPS!!! " + message);

@@ -14,7 +14,7 @@ public class MarkCommand extends TaskCommand {
     /**
      * Creates a command that marks the task at the given one-based number.
      *
-     * @param taskNumber one-based number of the task to mark
+     * @param taskNumber one-based number of the task to mark.
      */
     public MarkCommand(int taskNumber) {
         super(taskNumber);

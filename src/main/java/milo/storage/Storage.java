@@ -39,7 +39,7 @@ public class Storage {
     /**
      * Creates storage that reads and writes tasks at the specified file.
      *
-     * @param filePath path of the task data file
+     * @param filePath path of the task data file.
      */
     public Storage(String filePath) {
         this.filePath = Path.of(filePath);
@@ -48,8 +48,8 @@ public class Storage {
     /**
      * Loads tasks from the data file, or returns an empty list when it does not exist.
      *
-     * @return tasks stored in the file
-     * @throws MiloException if the task file cannot be read or contains malformed data
+     * @return tasks stored in the file.
+     * @throws MiloException if the task file cannot be read or contains malformed data.
      */
     public List<Task> load() throws MiloException {
         try {
@@ -70,8 +70,8 @@ public class Storage {
     /**
      * Saves all tasks using an atomic replacement when the file system supports it.
      *
-     * @param tasks task list to save
-     * @throws MiloException if the tasks cannot be saved
+     * @param tasks task list to save.
+     * @throws MiloException if the tasks cannot be saved.
      */
     public void save(TaskList tasks) throws MiloException {
         Path temporaryFile = filePath.resolveSibling(filePath.getFileName() + ".tmp");

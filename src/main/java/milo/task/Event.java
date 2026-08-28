@@ -14,9 +14,9 @@ public class Event extends Task {
     /**
      * Creates an incomplete event with its start and end date or time.
      *
-     * @param description description of the event
-    * @param from start date
-    * @param to end date
+     * @param description description of the event.
+     * @param from start date.
+     * @param to end date.
      */
     public Event(String description, LocalDate from, LocalDate to) {
         super(description);
@@ -27,11 +27,11 @@ public class Event extends Task {
     /**
      * Returns the event with its type, completion status, start, and end.
      *
-     * @return formatted event
+     * @return formatted event.
      */
     @Override
     public String toString() {
         return "[E]" + super.toString() + " (from: " + from.format(DISPLAY_FORMAT)
-            + " to: " + to.format(DISPLAY_FORMAT) + ")";
+                + " to: " + to.format(DISPLAY_FORMAT) + ")";
     }
 }

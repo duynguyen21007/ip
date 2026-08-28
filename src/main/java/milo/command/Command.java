@@ -13,10 +13,10 @@ public abstract class Command {
     /**
      * Performs this command using Milo's task list, UI, and storage.
      *
-     * @param tasks task list on which to operate
-     * @param ui console UI through which to present the result
-     * @param storage storage used to persist task changes
-     * @throws MiloException if the command cannot be completed
+     * @param tasks task list on which to operate.
+     * @param ui console UI through which to present the result.
+     * @param storage storage used to persist task changes.
+     * @throws MiloException if the command cannot be completed.
      */
     public abstract void execute(TaskList tasks, Ui ui, Storage storage) throws MiloException;
 
