@@ -312,8 +312,7 @@ public class TaskListTest {
         TaskList tasks = createThreeTaskList();
         List<Task> taskSnapshot = tasks.getTasks();
 
-        assertThrows(UnsupportedOperationException.class,
-                () -> taskSnapshot.add(insertedTask));
+        assertThrows(UnsupportedOperationException.class, () -> taskSnapshot.add(insertedTask));
         assertListContainsTasks(tasks, firstTask, secondTask, thirdTask);
     }
 
