@@ -1,5 +1,6 @@
 package milo.ui;
 
+import java.io.PrintStream;
 import java.util.Scanner;
 
 import milo.task.Task;
@@ -19,10 +20,25 @@ public class Ui implements AutoCloseable {
             + "|_|  |_|_|_|\\___/ \n";
 
     private final Scanner scanner;
+    private final PrintStream output;
+    private final String indentBlock;
 
     /** Creates a console UI that reads from standard input. */
     public Ui() {
         this.scanner = new Scanner(System.in);
+        this.output = System.out;
+        this.indentBlock = INDENT_BLOCK;
+    }
+
+    /**
+     * Creates an output-only UI used to collect a command response.
+     *
+     * @param output destination for the response.
+     */
+    public Ui(PrintStream output) {
+        this.scanner = null;
+        this.output = output;
+        this.indentBlock = "";
     }
 
     /** Shows Milo's banner and greeting. */
@@ -31,7 +47,7 @@ public class Ui implements AutoCloseable {
                 + "Hello! I'm " + CHATBOT_NAME + ".\n"
                 + "How can I help you?\n"
                 + DIVIDER;
-        System.out.println(BANNER + greeting);
+        output.println(BANNER + greeting);
     }
 
     /**
@@ -40,7 +56,7 @@ public class Ui implements AutoCloseable {
      * @return {@code true} if another command is available, otherwise {@code false}.
      */
     public boolean hasNextCommand() {
-        return scanner.hasNextLine();
+        return scanner != null && scanner.hasNextLine();
     }
 
     /**
@@ -49,17 +65,20 @@ public class Ui implements AutoCloseable {
      * @return next trimmed command.
      */
     public String readCommand() {
+        if (scanner == null) {
+            throw new IllegalStateException("This UI does not accept console input.");
+        }
         return scanner.nextLine().trim();
     }
 
     /** Shows the divider between Milo's responses. */
     public void showLine() {
-        System.out.println(INDENT_BLOCK + DIVIDER);
+        output.println(indentBlock + DIVIDER);
     }
 
     /** Shows Milo's farewell message. */
     public void showGoodbye() {
-        System.out.println(INDENT_BLOCK + "Bye, see you later!");
+        output.println(indentBlock + "Bye, see you later!");
     }
 
     /**
@@ -68,7 +87,7 @@ public class Ui implements AutoCloseable {
      * @param tasks tasks to show.
      */
     public void showTaskList(TaskList tasks) {
-        System.out.println(INDENT_BLOCK + "Here are the tasks in your list:");
+        output.println(indentBlock + "Here are the tasks in your list:");
         showNumberedTasks(tasks);
     }
 
@@ -78,7 +97,7 @@ public class Ui implements AutoCloseable {
      * @param matchingTasks matching tasks to show.
      */
     public void showMatchingTasks(TaskList matchingTasks) {
-        System.out.println(INDENT_BLOCK + "Here are the matching tasks in your list:");
+        output.println(indentBlock + "Here are the matching tasks in your list:");
         showNumberedTasks(matchingTasks);
     }
 
@@ -89,20 +108,20 @@ public class Ui implements AutoCloseable {
      * @param taskCount number of tasks after the addition.
      */
     public void showTaskAdded(Task task, int taskCount) {
-        System.out.println(INDENT_BLOCK + "Got it. I've added this task:");
+        output.println(indentBlock + "Got it. I've added this task:");
         showTask(task);
-        System.out.println(INDENT_BLOCK + "Now you have " + taskCount
+        output.println(indentBlock + "Now you have " + taskCount
                 + " tasks in the list.");
     }
 
     /** Shows the heading for a task that was marked as done. */
     public void showTaskMarkedHeader() {
-        System.out.println(INDENT_BLOCK + "Nice! I've marked this task as done:");
+        output.println(indentBlock + "Nice! I've marked this task as done:");
     }
 
     /** Shows the heading for a task that was marked as not done. */
     public void showTaskUnmarkedHeader() {
-        System.out.println(INDENT_BLOCK + "OK, I've marked this task as not done yet:");
+        output.println(indentBlock + "OK, I've marked this task as not done yet:");
     }
 
     /**
@@ -111,7 +130,7 @@ public class Ui implements AutoCloseable {
      * @param task task to show.
      */
     public void showTask(Task task) {
-        System.out.println(INDENT_BLOCK + "  " + task);
+        output.println(indentBlock + "  " + task);
     }
 
     /**
@@ -121,9 +140,9 @@ public class Ui implements AutoCloseable {
      * @param taskCount number of tasks after the deletion.
      */
     public void showTaskDeleted(Task task, int taskCount) {
-        System.out.println(INDENT_BLOCK + "Noted. I've removed this task:");
+        output.println(indentBlock + "Noted. I've removed this task:");
         showTask(task);
-        System.out.println(INDENT_BLOCK + "Now you have " + taskCount
+        output.println(indentBlock + "Now you have " + taskCount
                 + " tasks in the list.");
     }
 
@@ -133,18 +152,20 @@ public class Ui implements AutoCloseable {
      * @param message explanation of the error.
      */
     public void showError(String message) {
-        System.out.println(INDENT_BLOCK + "OOPS!!! " + message);
+        output.println(indentBlock + "OOPS!!! " + message);
     }
 
     /** Shows tasks with one-based numbers. */
     private void showNumberedTasks(TaskList tasks) {
         for (int i = 0; i < tasks.size(); i++) {
-            System.out.println(INDENT_BLOCK + (i + 1) + "." + tasks.get(i));
+            output.println(indentBlock + (i + 1) + "." + tasks.get(i));
         }
     }
 
     @Override
     public void close() {
-        scanner.close();
+        if (scanner != null) {
+            scanner.close();
+        }
     }
 }
