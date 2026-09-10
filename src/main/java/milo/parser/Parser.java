@@ -118,32 +118,45 @@ public class Parser {
      * @throws MiloException if the command lacks required task details.
      */
     private static Task parseTask(String command, CommandType commandType) throws MiloException {
+        switch (commandType) {
+        case TODO:
+            return parseTodo(command);
+        case DEADLINE:
+            return parseDeadline(command);
+        case EVENT:
+            return parseEvent(command);
+        default:
+            throw new IllegalStateException("Not a task command: " + commandType);
+        }
+    }
+
+    /** Parses a todo or reports its missing description. */
+    private static Todo parseTodo(String command) throws MiloException {
         Matcher todoMatcher = TODO_COMMAND.matcher(command);
         if (todoMatcher.matches()) {
             return new Todo(todoMatcher.group(1));
         }
+        throw new MiloException("A todo needs a description.");
+    }
 
+    /** Parses a deadline or reports its missing description or date. */
+    private static Deadline parseDeadline(String command) throws MiloException {
         Matcher deadlineMatcher = DEADLINE_COMMAND.matcher(command);
         if (deadlineMatcher.matches()) {
             return new Deadline(deadlineMatcher.group(1), parseDate(deadlineMatcher.group(2)));
         }
+        throw new MiloException("A deadline needs a description followed by /by and a date or time.");
+    }
 
+    /** Parses an event or reports its missing description or date range. */
+    private static Event parseEvent(String command) throws MiloException {
         Matcher eventMatcher = EVENT_COMMAND.matcher(command);
         if (eventMatcher.matches()) {
             return new Event(eventMatcher.group(1), parseDate(eventMatcher.group(2)),
                     parseDate(eventMatcher.group(3)));
         }
 
-        if (commandType == CommandType.TODO) {
-            throw new MiloException("A todo needs a description.");
-        } else if (commandType == CommandType.DEADLINE) {
-            throw new MiloException(
-                    "A deadline needs a description followed by /by and a date or time.");
-        } else if (commandType == CommandType.EVENT) {
-            throw new MiloException(
-                    "An event needs a description, /from start, and /to end.");
-        }
-        throw new IllegalStateException("Not a task command: " + commandType);
+        throw new MiloException("An event needs a description, /from start, and /to end.");
     }
 
     /**
