@@ -57,11 +57,9 @@ public class Storage {
                 return new ArrayList<>();
             }
 
-            List<Task> tasks = new ArrayList<>();
-            for (String taskLine : Files.readAllLines(filePath)) {
-                tasks.add(parseStoredTask(taskLine));
-            }
-            return tasks;
+            return Files.readAllLines(filePath).stream()
+                    .map(this::parseStoredTask)
+                    .toList();
         } catch (IOException | SecurityException | IllegalArgumentException exception) {
             throw new MiloException("I couldn't load your tasks.");
         }
