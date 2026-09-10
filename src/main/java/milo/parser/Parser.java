@@ -43,6 +43,7 @@ public class Parser {
      * @throws MiloException if the command or its arguments are invalid.
      */
     public static Command parse(String command) throws MiloException {
+        assert command != null && command.equals(command.trim()) : "Commands must be non-null and trimmed";
         CommandType commandType = parseCommandType(command);
         switch (commandType) {
             case BYE:
