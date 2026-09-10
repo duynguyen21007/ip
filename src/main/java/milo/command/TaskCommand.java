@@ -25,6 +25,8 @@ abstract class TaskCommand extends Command {
         if (taskNumber < 1 || taskNumber > tasks.size()) {
             throw new MiloException("There is no task numbered " + taskNumber + ".");
         }
-        return taskNumber - 1;
+        int taskIndex = taskNumber - 1;
+        assert taskIndex >= 0 && taskIndex < tasks.size() : "Validated task number must map to an existing task";
+        return taskIndex;
     }
 }
