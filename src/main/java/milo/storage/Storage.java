@@ -126,6 +126,7 @@ public class Storage {
 
     /** Restores the persisted completion state and returns the task. */
     private Task restoreDoneStatus(Task task, String statusIcon) {
+        assert statusIcon.equals("X") || statusIcon.equals(" ") : "Stored status must match the task-line format";
         if (statusIcon.equals("X")) {
             task.markAsDone();
         }
