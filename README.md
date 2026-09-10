@@ -47,3 +47,13 @@ java -jar build/libs/duke.jar
 ```
 
 Milo reads and writes `data/duke.txt` relative to the directory from which the JAR is run.
+
+## Automated checks
+
+GitHub Actions runs the JUnit tests and builds the executable JAR on Windows and Linux for pushes and pull requests, using Java 25. Run the same Gradle checks locally in PowerShell with:
+
+```powershell
+.\gradlew.bat check shadowJar
+```
+
+Tests use temporary task files so repeated runs do not change your saved tasks.
