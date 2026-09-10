@@ -8,6 +8,10 @@
 
 Each test case starts Milo in a fresh process. Start the ordered suite without `data/duke.txt`; the first two cases intentionally share saved state to verify loading across a restart, and every later stateful case removes its tasks before exiting. The runner compares complete standard output after normalizing platform line endings and trailing spaces. Leading whitespace remains significant. It stops immediately after the first failing case and records the visible session in `_temp/ui-test/session.log`.
 
+Save failures are covered by `SaveFailureTest` using a file where a storage directory is required. These tests verify that add, delete, mark, and unmark preserve the original task state, retain the underlying filesystem exception, and produce no success output when saving fails. The command loop reports `OOPS!!! I couldn't save your tasks.`. The console cases below retain their successful-save expectations.
+
+`StorageTest` simulates access-denied errors at file replacement to verify successful retries, a five-attempt limit, preservation of the original file on persistent failure, immediate failure for other I/O errors, and interruption handling. Replacement retries wait 50 ms between attempts, for at most 200 ms of waiting.
+
 ## Test case: Add and list all task types
 
 ### Aim
@@ -933,6 +937,203 @@ How can I help you?
                    Noted. I've removed this task:
                      [T][ ] borrow book
                    Now you have 0 tasks in the list.
+                   -----------------------------------
+                   -----------------------------------
+                   Bye, see you later!
+                   -----------------------------------
+```
+
+## Test case: Statistics on an empty list and invalid arguments
+
+### Aim
+
+Verify zero counts, surrounding whitespace, and rejection of extra arguments and lookalike commands.
+
+### Inputs
+
+```text
+stats
+  stats
+stats week
+statsmore
+STATS
+bye
+```
+
+### Expected output
+
+```text
+ __  __ _ _
+|  \/  (_) | ___
+| |\/| | | |/ _ \
+| |  | | | | (_) |
+|_|  |_|_|_|\___/
+-----------------------------------
+Hello! I'm Milo.
+How can I help you?
+-----------------------------------
+                   -----------------------------------
+                   Here are your task statistics:
+                   Total: 0
+                   Completed: 0
+                   Pending: 0
+                   Completion: 0.0%
+                   Todos: 0
+                   Deadlines: 0
+                   Events: 0
+                   -----------------------------------
+                   -----------------------------------
+                   Here are your task statistics:
+                   Total: 0
+                   Completed: 0
+                   Pending: 0
+                   Completion: 0.0%
+                   Todos: 0
+                   Deadlines: 0
+                   Events: 0
+                   -----------------------------------
+                   -----------------------------------
+                   OOPS!!! Use stats without additional arguments.
+                   -----------------------------------
+                   -----------------------------------
+                   OOPS!!! I don't recognize that command :-(
+                   -----------------------------------
+                   -----------------------------------
+                   OOPS!!! I don't recognize that command :-(
+                   -----------------------------------
+                   -----------------------------------
+                   Bye, see you later!
+                   -----------------------------------
+```
+
+## Test case: Statistics reflect changes to all task types
+
+### Aim
+
+Verify type counts, fractional completion, full-list scope after find, unmarking, and deletion back to an empty list.
+
+### Inputs
+
+```text
+todo read book
+deadline return book /by 2026-09-15
+event meeting /from 2026-09-16 /to 2026-09-17
+stats
+mark 1
+stats
+find missing
+stats
+unmark 1
+stats
+delete 3
+delete 2
+delete 1
+stats
+bye
+```
+
+### Expected output
+
+```text
+ __  __ _ _
+|  \/  (_) | ___
+| |\/| | | |/ _ \
+| |  | | | | (_) |
+|_|  |_|_|_|\___/
+-----------------------------------
+Hello! I'm Milo.
+How can I help you?
+-----------------------------------
+                   -----------------------------------
+                   Got it. I've added this task:
+                     [T][ ] read book
+                   Now you have 1 tasks in the list.
+                   -----------------------------------
+                   -----------------------------------
+                   Got it. I've added this task:
+                     [D][ ] return book (by: Sep 15 2026)
+                   Now you have 2 tasks in the list.
+                   -----------------------------------
+                   -----------------------------------
+                   Got it. I've added this task:
+                     [E][ ] meeting (from: Sep 16 2026 to: Sep 17 2026)
+                   Now you have 3 tasks in the list.
+                   -----------------------------------
+                   -----------------------------------
+                   Here are your task statistics:
+                   Total: 3
+                   Completed: 0
+                   Pending: 3
+                   Completion: 0.0%
+                   Todos: 1
+                   Deadlines: 1
+                   Events: 1
+                   -----------------------------------
+                   -----------------------------------
+                   Nice! I've marked this task as done:
+                     [T][X] read book
+                   -----------------------------------
+                   -----------------------------------
+                   Here are your task statistics:
+                   Total: 3
+                   Completed: 1
+                   Pending: 2
+                   Completion: 33.3%
+                   Todos: 1
+                   Deadlines: 1
+                   Events: 1
+                   -----------------------------------
+                   -----------------------------------
+                   Here are the matching tasks in your list:
+                   -----------------------------------
+                   -----------------------------------
+                   Here are your task statistics:
+                   Total: 3
+                   Completed: 1
+                   Pending: 2
+                   Completion: 33.3%
+                   Todos: 1
+                   Deadlines: 1
+                   Events: 1
+                   -----------------------------------
+                   -----------------------------------
+                   OK, I've marked this task as not done yet:
+                     [T][ ] read book
+                   -----------------------------------
+                   -----------------------------------
+                   Here are your task statistics:
+                   Total: 3
+                   Completed: 0
+                   Pending: 3
+                   Completion: 0.0%
+                   Todos: 1
+                   Deadlines: 1
+                   Events: 1
+                   -----------------------------------
+                   -----------------------------------
+                   Noted. I've removed this task:
+                     [E][ ] meeting (from: Sep 16 2026 to: Sep 17 2026)
+                   Now you have 2 tasks in the list.
+                   -----------------------------------
+                   -----------------------------------
+                   Noted. I've removed this task:
+                     [D][ ] return book (by: Sep 15 2026)
+                   Now you have 1 tasks in the list.
+                   -----------------------------------
+                   -----------------------------------
+                   Noted. I've removed this task:
+                     [T][ ] read book
+                   Now you have 0 tasks in the list.
+                   -----------------------------------
+                   -----------------------------------
+                   Here are your task statistics:
+                   Total: 0
+                   Completed: 0
+                   Pending: 0
+                   Completion: 0.0%
+                   Todos: 0
+                   Deadlines: 0
+                   Events: 0
                    -----------------------------------
                    -----------------------------------
                    Bye, see you later!

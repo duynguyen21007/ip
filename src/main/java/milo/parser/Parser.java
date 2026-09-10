@@ -13,6 +13,7 @@ import milo.command.ExitCommand;
 import milo.command.FindCommand;
 import milo.command.ListCommand;
 import milo.command.MarkCommand;
+import milo.command.StatisticsCommand;
 import milo.command.UnmarkCommand;
 import milo.exception.MiloException;
 import milo.task.Deadline;
@@ -49,6 +50,11 @@ public class Parser {
                 return new ExitCommand();
             case LIST:
                 return new ListCommand();
+            case STATS:
+                if (!command.equals("stats")) {
+                    throw new MiloException("Use stats without additional arguments.");
+                }
+                return new StatisticsCommand();
             case FIND:
                 return new FindCommand(parseKeyword(command));
             case MARK:
@@ -76,6 +82,8 @@ public class Parser {
             return CommandType.BYE;
         } else if (command.equals("list")) {
             return CommandType.LIST;
+        } else if (hasCommandWord(command, "stats")) {
+            return CommandType.STATS;
         } else if (hasCommandWord(command, "find")) {
             return CommandType.FIND;
         } else if (hasCommandWord(command, "mark")) {

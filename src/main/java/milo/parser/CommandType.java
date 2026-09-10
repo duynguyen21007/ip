@@ -8,6 +8,8 @@ public enum CommandType {
     BYE,
     /** List command. */
     LIST,
+    /** Statistics command. */
+    STATS,
     /** Find command. */
     FIND,
     /** Mark command. */

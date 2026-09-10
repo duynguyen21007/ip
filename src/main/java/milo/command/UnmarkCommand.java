@@ -23,14 +23,17 @@ public class UnmarkCommand extends TaskCommand {
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws MiloException {
         int taskIndex = getTaskIndex(tasks);
+        boolean isPreviouslyDone = tasks.get(taskIndex).isDone();
         Task unmarkedTask = tasks.unmark(taskIndex);
-        ui.showTaskUnmarkedHeader();
         try {
             storage.save(tasks);
         } catch (MiloException exception) {
-            tasks.mark(taskIndex);
+            if (isPreviouslyDone) {
+                tasks.mark(taskIndex);
+            }
             throw exception;
         }
+        ui.showTaskUnmarkedHeader();
         ui.showTask(unmarkedTask);
     }
 }
