@@ -62,11 +62,9 @@ public class Storage {
                 return new ArrayList<>();
             }
 
-            List<Task> tasks = new ArrayList<>();
-            for (String taskLine : Files.readAllLines(filePath)) {
-                tasks.add(parseStoredTask(taskLine));
-            }
-            return tasks;
+            return Files.readAllLines(filePath).stream()
+                    .map(this::parseStoredTask)
+                    .toList();
         } catch (IOException | SecurityException | IllegalArgumentException exception) {
             throw new MiloException("I couldn't load your tasks.", exception);
         }
@@ -156,6 +154,7 @@ public class Storage {
 
     /** Restores the persisted completion state and returns the task. */
     private Task restoreDoneStatus(Task task, String statusIcon) {
+        assert statusIcon.equals("X") || statusIcon.equals(" ") : "Stored status must match the task-line format";
         if (statusIcon.equals("X")) {
             task.markAsDone();
         }
