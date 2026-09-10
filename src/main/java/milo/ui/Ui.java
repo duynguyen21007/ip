@@ -1,10 +1,12 @@
 package milo.ui;
 
 import java.io.PrintStream;
+import java.util.Locale;
 import java.util.Scanner;
 
 import milo.task.Task;
 import milo.task.TaskList;
+import milo.task.TaskStatistics;
 
 /**
  * Handles Milo's console input and output.
@@ -99,6 +101,23 @@ public class Ui implements AutoCloseable {
     public void showMatchingTasks(TaskList matchingTasks) {
         output.println(indentBlock + "Here are the matching tasks in your list:");
         showNumberedTasks(matchingTasks);
+    }
+
+    /**
+     * Shows current task counts and completion percentage to one decimal place.
+     *
+     * @param statistics summary of the current list.
+     */
+    public void showStatistics(TaskStatistics statistics) {
+        output.println(indentBlock + "Here are your task statistics:");
+        output.println(indentBlock + "Total: " + statistics.getTotalCount());
+        output.println(indentBlock + "Completed: " + statistics.getCompletedCount());
+        output.println(indentBlock + "Pending: " + statistics.getPendingCount());
+        output.println(indentBlock + String.format(Locale.ROOT, "Completion: %.1f%%",
+                statistics.getCompletionPercentage()));
+        output.println(indentBlock + "Todos: " + statistics.getTodoCount());
+        output.println(indentBlock + "Deadlines: " + statistics.getDeadlineCount());
+        output.println(indentBlock + "Events: " + statistics.getEventCount());
     }
 
     /**

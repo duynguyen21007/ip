@@ -15,4 +15,14 @@ public class MiloException extends Exception {
     public MiloException(String message) {
         super(message);
     }
+
+    /**
+     * Creates a user-friendly error while retaining its underlying cause for diagnosis.
+     *
+     * @param message explanation to display to the user.
+     * @param cause original error that prevented the operation.
+     */
+    public MiloException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

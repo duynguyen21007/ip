@@ -23,14 +23,17 @@ public class MarkCommand extends TaskCommand {
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws MiloException {
         int taskIndex = getTaskIndex(tasks);
+        boolean isPreviouslyDone = tasks.get(taskIndex).isDone();
         Task markedTask = tasks.mark(taskIndex);
-        ui.showTaskMarkedHeader();
         try {
             storage.save(tasks);
         } catch (MiloException exception) {
-            tasks.unmark(taskIndex);
+            if (!isPreviouslyDone) {
+                tasks.unmark(taskIndex);
+            }
             throw exception;
         }
+        ui.showTaskMarkedHeader();
         ui.showTask(markedTask);
     }
 }

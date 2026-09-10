@@ -1,6 +1,7 @@
 package milo.storage;
 
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,6 +25,10 @@ import milo.task.Todo;
  * Loads and saves Milo's task list in a line-based file format.
  */
 public class Storage {
+    /** Bounds retries when Windows temporarily denies replacing the saved file. */
+    private static final int SAVE_ATTEMPTS = 5;
+    private static final long SAVE_RETRY_DELAY_MILLIS = 50;
+
     private static final String STORED_DATE_PATTERN = "[A-Z][a-z]{2} \\d{2} \\d{4}";
     private static final DateTimeFormatter STORED_DATE_FORMAT =
             DateTimeFormatter.ofPattern("MMM dd yyyy", Locale.ENGLISH);
@@ -61,7 +66,7 @@ public class Storage {
                     .map(this::parseStoredTask)
                     .toList();
         } catch (IOException | SecurityException | IllegalArgumentException exception) {
-            throw new MiloException("I couldn't load your tasks.");
+            throw new MiloException("I couldn't load your tasks.", exception);
         }
     }
 
@@ -80,20 +85,45 @@ public class Storage {
             }
             List<String> taskLines = tasks.getTasks().stream().map(Task::toString).toList();
             Files.write(temporaryFile, taskLines);
-            try {
-                Files.move(temporaryFile, filePath, StandardCopyOption.REPLACE_EXISTING,
-                        StandardCopyOption.ATOMIC_MOVE);
-            } catch (AtomicMoveNotSupportedException exception) {
-                Files.move(temporaryFile, filePath, StandardCopyOption.REPLACE_EXISTING);
-            }
+            replaceFileWithRetry(temporaryFile);
         } catch (IOException | SecurityException exception) {
-            throw new MiloException("I couldn't save your tasks.");
+            throw new MiloException("I couldn't save your tasks.", exception);
         } finally {
             try {
                 Files.deleteIfExists(temporaryFile);
             } catch (IOException | SecurityException exception) {
                 // The next save will replace the temporary file.
             }
+        }
+    }
+
+    /** Retries only access-denied replacements; other storage errors fail immediately. */
+    private void replaceFileWithRetry(Path temporaryFile) throws IOException {
+        for (int attempt = 1; attempt <= SAVE_ATTEMPTS; attempt++) {
+            try {
+                replaceFile(temporaryFile);
+                return;
+            } catch (AccessDeniedException exception) {
+                if (attempt == SAVE_ATTEMPTS) {
+                    throw exception;
+                }
+                try {
+                    Thread.sleep(SAVE_RETRY_DELAY_MILLIS);
+                } catch (InterruptedException interruptedException) {
+                    Thread.currentThread().interrupt();
+                    throw new IOException("Interrupted while waiting to save tasks", interruptedException);
+                }
+            }
+        }
+    }
+
+    /** Replaces the data file atomically where supported, without deleting it first. */
+    void replaceFile(Path temporaryFile) throws IOException {
+        try {
+            Files.move(temporaryFile, filePath, StandardCopyOption.REPLACE_EXISTING,
+                    StandardCopyOption.ATOMIC_MOVE);
+        } catch (AtomicMoveNotSupportedException exception) {
+            Files.move(temporaryFile, filePath, StandardCopyOption.REPLACE_EXISTING);
         }
     }
 
