@@ -2,12 +2,19 @@ package milo;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.Test;
+import java.nio.file.Path;
 
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+/** Tests command responses using isolated storage for every test. */
 public class MiloTest {
+    @TempDir
+    private Path temporaryDirectory;
+
     @Test
     public void getResponse_validCommand_returnsCommandOutput() {
-        Milo milo = new Milo("build/test-data/MiloTest/valid-command.txt");
+        Milo milo = new Milo(temporaryDirectory.resolve("valid-command.txt").toString());
 
         String response = milo.getResponse("todo read book");
 
@@ -18,7 +25,7 @@ public class MiloTest {
 
     @Test
     public void getResponse_invalidCommand_returnsErrorOutput() {
-        Milo milo = new Milo("build/test-data/MiloTest/invalid-command.txt");
+        Milo milo = new Milo(temporaryDirectory.resolve("invalid-command.txt").toString());
 
         String response = milo.getResponse("unknown");
 
