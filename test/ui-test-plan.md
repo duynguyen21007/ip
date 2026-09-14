@@ -6,11 +6,54 @@
 - Source directory: `src/main/java`
 - Java release: `25`
 
-Each test case starts Milo in a fresh process. Start the ordered suite without `data/duke.txt`; the first two cases intentionally share saved state to verify loading across a restart, and every later stateful case removes its tasks before exiting. The runner compares complete standard output after normalizing platform line endings and trailing spaces. Leading whitespace remains significant. It stops immediately after the first failing case and records the visible session in `_temp/ui-test/session.log`.
+Each test case starts Milo in a fresh process. Start the ordered suite without `data/duke.txt`; the "Add and list all task types" and "Load saved tasks after restart" cases intentionally share saved state, and every later stateful case removes its tasks before exiting. The runner compares complete standard output after normalizing platform line endings and trailing spaces. Leading whitespace remains significant. It stops immediately after the first failing case and records the visible session in `_temp/ui-test/session.log`.
 
 Save failures are covered by `SaveFailureTest` using a file where a storage directory is required. These tests verify that add, delete, mark, and unmark preserve the original task state, retain the underlying filesystem exception, and produce no success output when saving fails. The command loop reports `OOPS!!! I couldn't save your tasks.`. The console cases below retain their successful-save expectations.
 
 `StorageTest` simulates access-denied errors at file replacement to verify successful retries, a five-attempt limit, preservation of the original file on persistent failure, immediate failure for other I/O errors, and interruption handling. Replacement retries wait 50 ms between attempts, for at most 200 ms of waiting.
+
+`MiloTest` also checks that reversed and same-day event ranges create no data file, and that invalid task numbers do not change tasks after a restart.
+
+## Test case: Reject an event whose end is not after its start
+
+### Aim
+
+Verify that a reversed or same-day event range is rejected without adding a task.
+
+### Inputs
+
+```text
+event meeting /from 2026-09-18 /to 2026-09-17
+event meeting /from 2026-09-18 /to 2026-09-18
+list
+bye
+```
+
+### Expected output
+
+```text
+ __  __ _ _
+|  \/  (_) | ___
+| |\/| | | |/ _ \
+| |  | | | | (_) |
+|_|  |_|_|_|\___/
+-----------------------------------
+Hello! I'm Milo.
+How can I help you?
+-----------------------------------
+                   -----------------------------------
+                   OOPS!!! An event's end date must be after its start date.
+                   -----------------------------------
+                   -----------------------------------
+                   OOPS!!! An event's end date must be after its start date.
+                   -----------------------------------
+                   -----------------------------------
+                   Here are the tasks in your list:
+                   -----------------------------------
+                   -----------------------------------
+                   Bye, see you later!
+                   -----------------------------------
+```
 
 ## Test case: Add and list all task types
 
