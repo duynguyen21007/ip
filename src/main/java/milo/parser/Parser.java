@@ -161,8 +161,12 @@ public class Parser {
     private static Event parseEvent(String command) throws MiloException {
         Matcher eventMatcher = EVENT_COMMAND.matcher(command);
         if (eventMatcher.matches()) {
-            return new Event(eventMatcher.group(1), parseDate(eventMatcher.group(2)),
-                    parseDate(eventMatcher.group(3)));
+            LocalDate startDate = parseDate(eventMatcher.group(2));
+            LocalDate endDate = parseDate(eventMatcher.group(3));
+            if (!startDate.isBefore(endDate)) {
+                throw new MiloException("An event's end date must be after its start date.");
+            }
+            return new Event(eventMatcher.group(1), startDate, endDate);
         }
 
         throw new MiloException("An event needs a description, /from start, and /to end.");

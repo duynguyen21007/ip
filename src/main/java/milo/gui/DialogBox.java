@@ -35,6 +35,7 @@ public class DialogBox extends HBox {
         }
 
         dialog.setText(text);
+        dialog.maxWidthProperty().bind(widthProperty().subtract(60));
         displayPicture.setImage(image);
     }
 
@@ -47,7 +48,7 @@ public class DialogBox extends HBox {
      */
     public static DialogBox getUserDialog(String text, Image image) {
         DialogBox dialogBox = new DialogBox(text, image);
-        dialogBox.dialog.setStyle("-fx-background-color: #DDE3FF; -fx-background-radius: 8;");
+        dialogBox.dialog.getStyleClass().add("user-message");
         return dialogBox;
     }
 
@@ -60,7 +61,15 @@ public class DialogBox extends HBox {
      */
     public static DialogBox getMiloDialog(String text, Image image) {
         DialogBox dialogBox = new DialogBox(text, image);
-        dialogBox.dialog.setStyle("-fx-background-color: #DDF4E8; -fx-background-radius: 8;");
+        dialogBox.dialog.getStyleClass().add("milo-message");
+        dialogBox.flip();
+        return dialogBox;
+    }
+
+    /** Creates a visually distinct response for a recoverable command error. */
+    public static DialogBox getErrorDialog(String text, Image image) {
+        DialogBox dialogBox = new DialogBox(text, image);
+        dialogBox.dialog.getStyleClass().add("error-message");
         dialogBox.flip();
         return dialogBox;
     }

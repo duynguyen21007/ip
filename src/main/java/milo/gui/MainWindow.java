@@ -17,7 +17,7 @@ import milo.Milo;
  * Controls Milo's main chat window.
  */
 public class MainWindow extends AnchorPane {
-    private static final int AVATAR_SIZE = 64;
+    private static final int AVATAR_SIZE = 36;
 
     @FXML
     private ScrollPane scrollPane;
@@ -54,9 +54,12 @@ public class MainWindow extends AnchorPane {
     private void handleUserInput() {
         String input = userInput.getText().trim();
         String response = milo.getResponse(input);
-        dialogContainer.getChildren().addAll(
-                DialogBox.getUserDialog(input, userImage),
-                DialogBox.getMiloDialog(response, miloImage));
+        dialogContainer.getChildren().add(DialogBox.getUserDialog(input, userImage));
+        if (response.startsWith("OOPS!!! ")) {
+            dialogContainer.getChildren().add(DialogBox.getErrorDialog(response, miloImage));
+        } else {
+            dialogContainer.getChildren().add(DialogBox.getMiloDialog(response, miloImage));
+        }
         userInput.clear();
         if (input.equals("bye")) {
             Platform.exit();

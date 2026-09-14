@@ -21,10 +21,12 @@ public class Main extends Application {
         AnchorPane root = fxmlLoader.load();
         fxmlLoader.<MainWindow>getController().setMilo(milo);
 
-        stage.setScene(new Scene(root));
+        Scene scene = new Scene(root);
+        scene.getStylesheets().add(Main.class.getResource("/view/Milo.css").toExternalForm());
+        stage.setScene(scene);
         stage.setTitle("Milo");
-        stage.setMinHeight(600.0);
-        stage.setMinWidth(400.0);
+        stage.setMinHeight(500.0);
+        stage.setMinWidth(380.0);
         stage.show();
     }
 }
