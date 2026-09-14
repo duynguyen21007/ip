@@ -5,46 +5,49 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Label?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity"
-            minHeight="-Infinity" minWidth="-Infinity"
-            prefHeight="600.0" prefWidth="400.0"
-            style="-fx-background-color: #F7F8FC;"
+<AnchorPane prefHeight="640.0" prefWidth="480.0"
+            styleClass="app-root"
             xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="milo.gui.MainWindow">
     <children>
+        <VBox spacing="2.0" styleClass="app-header"
+              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <Label text="Milo" styleClass="app-title" />
+                <Label text="Your task companion" styleClass="app-subtitle" />
+            </children>
+        </VBox>
         <ScrollPane fx:id="scrollPane"
                     fitToWidth="true"
                     hbarPolicy="NEVER"
-                    prefHeight="552.0"
-                    prefWidth="400.0"
-                    AnchorPane.bottomAnchor="48.0"
-                    AnchorPane.leftAnchor="0.0"
-                    AnchorPane.rightAnchor="0.0"
-                    AnchorPane.topAnchor="0.0">
+                    AnchorPane.bottomAnchor="62.0"
+                    AnchorPane.leftAnchor="12.0"
+                    AnchorPane.rightAnchor="12.0"
+                    AnchorPane.topAnchor="72.0">
             <content>
                 <VBox fx:id="dialogContainer"
                       fillWidth="true"
-                      prefWidth="388.0"
-                      spacing="8.0"
-                      style="-fx-background-color: #F7F8FC;" />
+                      spacing="10.0"
+                      styleClass="dialog-container" />
             </content>
         </ScrollPane>
         <TextField fx:id="userInput"
                    onAction="#handleUserInput"
-                   prefHeight="48.0"
+                   prefHeight="40.0"
                    promptText="Enter a command..."
-                   AnchorPane.bottomAnchor="0.0"
-                   AnchorPane.leftAnchor="0.0"
-                   AnchorPane.rightAnchor="76.0" />
+                   AnchorPane.bottomAnchor="12.0"
+                   AnchorPane.leftAnchor="12.0"
+                   AnchorPane.rightAnchor="96.0" />
         <Button fx:id="sendButton"
                 mnemonicParsing="false"
                 onAction="#handleUserInput"
-                prefHeight="48.0"
+                prefHeight="40.0"
                 prefWidth="76.0"
                 text="Send"
-                AnchorPane.bottomAnchor="0.0"
-                AnchorPane.rightAnchor="0.0" />
+                AnchorPane.bottomAnchor="12.0"
+                AnchorPane.rightAnchor="12.0" />
     </children>
 </AnchorPane>
