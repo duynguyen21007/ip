@@ -114,6 +114,50 @@ How can I help you?
                    -----------------------------------
 ```
 
+## Test case: Show command help
+
+### Aim
+
+Verify that `help` lists every supported command and its expected syntax without changing task state.
+
+### Inputs
+
+```text
+help
+bye
+```
+
+### Expected output
+
+```text
+ __  __ _ _
+|  \/  (_) | ___
+| |\/| | | |/ _ \
+| |  | | | | (_) |
+|_|  |_|_|_|\___/
+-----------------------------------
+Hello! I'm Milo.
+How can I help you?
+-----------------------------------
+                   -----------------------------------
+                   Here are the commands you can use:
+                   todo <description> - add a todo
+                   deadline <description> /by <yyyy-MM-dd> - add a deadline
+                   event <description> /from <yyyy-MM-dd> /to <yyyy-MM-dd> - add an event
+                   list - show all tasks
+                   find <keyword> - find matching tasks
+                   mark <number> - mark a task as done
+                   unmark <number> - mark a task as not done
+                   delete <number> - remove a task
+                   stats - show task statistics
+                   help - show this help message
+                   bye - exit Milo
+                   -----------------------------------
+                   -----------------------------------
+                   Bye, see you later!
+                   -----------------------------------
+```
+
 ## Test case: Load saved tasks after restart
 
 ### Aim

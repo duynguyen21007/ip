@@ -83,6 +83,22 @@ public class Ui implements AutoCloseable {
         output.println(indentBlock + "Bye, see you later!");
     }
 
+    /** Shows every supported command and its expected syntax. */
+    public void showHelp() {
+        output.println(indentBlock + "Here are the commands you can use:");
+        output.println(indentBlock + "todo <description> - add a todo");
+        output.println(indentBlock + "deadline <description> /by <yyyy-MM-dd> - add a deadline");
+        output.println(indentBlock + "event <description> /from <yyyy-MM-dd> /to <yyyy-MM-dd> - add an event");
+        output.println(indentBlock + "list - show all tasks");
+        output.println(indentBlock + "find <keyword> - find matching tasks");
+        output.println(indentBlock + "mark <number> - mark a task as done");
+        output.println(indentBlock + "unmark <number> - mark a task as not done");
+        output.println(indentBlock + "delete <number> - remove a task");
+        output.println(indentBlock + "stats - show task statistics");
+        output.println(indentBlock + "help - show this help message");
+        output.println(indentBlock + "bye - exit Milo");
+    }
+
     /**
      * Shows every task with its one-based list number.
      *

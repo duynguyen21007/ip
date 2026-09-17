@@ -11,6 +11,7 @@ import milo.command.Command;
 import milo.command.DeleteCommand;
 import milo.command.ExitCommand;
 import milo.command.FindCommand;
+import milo.command.HelpCommand;
 import milo.command.ListCommand;
 import milo.command.MarkCommand;
 import milo.command.StatisticsCommand;
@@ -49,6 +50,8 @@ public class Parser {
         switch (commandType) {
             case BYE:
                 return new ExitCommand();
+            case HELP:
+                return new HelpCommand();
             case LIST:
                 return new ListCommand();
             case STATS:
@@ -81,6 +84,8 @@ public class Parser {
     private static CommandType parseCommandType(String command) {
         if (command.equals("bye")) {
             return CommandType.BYE;
+        } else if (command.equals("help")) {
+            return CommandType.HELP;
         } else if (command.equals("list")) {
             return CommandType.LIST;
         } else if (hasCommandWord(command, "stats")) {

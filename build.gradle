@@ -62,7 +62,7 @@ jar {
 }
 
 shadowJar {
-    archiveFileName = 'duke.jar'
+    archiveFileName = 'Milo.jar'
     manifest {
         attributes 'Main-Class': application.mainClass.get()
     }

@@ -59,4 +59,24 @@ public class MiloTest {
         assertEquals("Here are the tasks in your list:\n1.[T][ ] read book",
                 new Milo(taskFile.toString()).getResponse("list"));
     }
+
+    @Test
+    public void getResponse_helpCommand_returnsAvailableCommands() {
+        Milo milo = new Milo(temporaryDirectory.resolve("help-command.txt").toString());
+
+        String response = milo.getResponse("help");
+
+        assertEquals("Here are the commands you can use:\n"
+                + "todo <description> - add a todo\n"
+                + "deadline <description> /by <yyyy-MM-dd> - add a deadline\n"
+                + "event <description> /from <yyyy-MM-dd> /to <yyyy-MM-dd> - add an event\n"
+                + "list - show all tasks\n"
+                + "find <keyword> - find matching tasks\n"
+                + "mark <number> - mark a task as done\n"
+                + "unmark <number> - mark a task as not done\n"
+                + "delete <number> - remove a task\n"
+                + "stats - show task statistics\n"
+                + "help - show this help message\n"
+                + "bye - exit Milo", response);
+    }
 }

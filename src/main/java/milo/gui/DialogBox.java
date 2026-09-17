@@ -1,29 +1,36 @@
 package milo.gui;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.Objects;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 
 /**
- * Displays one chat message beside an avatar.
+ * Displays one chat message with its sender's name and optional avatar.
  */
 public class DialogBox extends HBox {
+    private static final String MILO_AVATAR_PATH = "/images/milo-avatar.png";
+    private static final Image MILO_AVATAR = new Image(Objects.requireNonNull(
+            DialogBox.class.getResourceAsStream(MILO_AVATAR_PATH),
+            "Missing Milo avatar: " + MILO_AVATAR_PATH));
+
     @FXML
     private Label dialog;
     @FXML
     private ImageView displayPicture;
+    @FXML
+    private Label senderName;
+    @FXML
+    private VBox messageContent;
 
-    private DialogBox(String text, Image image) {
+    private DialogBox(String text) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(
                     MainWindow.class.getResource("/view/DialogBox.fxml"));
@@ -35,20 +42,19 @@ public class DialogBox extends HBox {
         }
 
         dialog.setText(text);
-        dialog.maxWidthProperty().bind(widthProperty().subtract(60));
-        displayPicture.setImage(image);
     }
 
     /**
      * Creates a right-aligned dialog for the user's input.
      *
      * @param text user's input.
-     * @param image user's avatar.
      * @return user dialog box.
      */
-    public static DialogBox getUserDialog(String text, Image image) {
-        DialogBox dialogBox = new DialogBox(text, image);
-        dialogBox.dialog.getStyleClass().add("user-message");
+    public static DialogBox getUserDialog(String text) {
+        DialogBox dialogBox = new DialogBox(text);
+        dialogBox.dialog.getStyleClass().add("user-bubble");
+        dialogBox.senderName.getStyleClass().add("user-name");
+        dialogBox.senderName.setText("You");
         return dialogBox;
     }
 
@@ -56,29 +62,38 @@ public class DialogBox extends HBox {
      * Creates a left-aligned dialog for Milo's response.
      *
      * @param text Milo's response.
-     * @param image Milo's avatar.
      * @return Milo dialog box.
      */
-    public static DialogBox getMiloDialog(String text, Image image) {
-        DialogBox dialogBox = new DialogBox(text, image);
-        dialogBox.dialog.getStyleClass().add("milo-message");
-        dialogBox.flip();
+    public static DialogBox getMiloDialog(String text) {
+        return getMiloDialog(text, "milo-bubble");
+    }
+
+    /**
+     * Creates a visually distinct response for a recoverable command error.
+     *
+     * @param text error response to show.
+     * @return error dialog box.
+     */
+    public static DialogBox getErrorDialog(String text) {
+        return getMiloDialog(text, "error-bubble");
+    }
+
+    /** Creates a left-aligned Milo dialog with the specified bubble style. */
+    private static DialogBox getMiloDialog(String text, String bubbleStyleClass) {
+        DialogBox dialogBox = new DialogBox(text);
+        dialogBox.dialog.getStyleClass().add(bubbleStyleClass);
+        dialogBox.senderName.getStyleClass().add("milo-name");
+        dialogBox.senderName.setText("Milo");
+        dialogBox.displayPicture.setImage(MILO_AVATAR);
+        dialogBox.displayPicture.setManaged(true);
+        dialogBox.displayPicture.setVisible(true);
+        dialogBox.alignLeft();
         return dialogBox;
     }
 
-    /** Creates a visually distinct response for a recoverable command error. */
-    public static DialogBox getErrorDialog(String text, Image image) {
-        DialogBox dialogBox = new DialogBox(text, image);
-        dialogBox.dialog.getStyleClass().add("error-message");
-        dialogBox.flip();
-        return dialogBox;
-    }
-
-    /** Places Milo's avatar on the left and response text on the right. */
-    private void flip() {
-        ObservableList<Node> children = FXCollections.observableArrayList(getChildren());
-        Collections.reverse(children);
-        getChildren().setAll(children);
+    /** Aligns Milo's responses with the left edge of the conversation. */
+    private void alignLeft() {
         setAlignment(Pos.TOP_LEFT);
+        messageContent.setAlignment(Pos.TOP_LEFT);
     }
 }

@@ -6,6 +6,8 @@ package milo.parser;
 public enum CommandType {
     /** Exit command. */
     BYE,
+    /** Help command. */
+    HELP,
     /** List command. */
     LIST,
     /** Statistics command. */
